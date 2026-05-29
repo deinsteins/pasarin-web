@@ -7,14 +7,17 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/deinsteins/pasarin-web/backend/internal/auth"
-	"github.com/deinsteins/pasarin-web/backend/internal/category/handler"
+	categoryHandler "github.com/deinsteins/pasarin-web/backend/internal/category/handler"
 	"github.com/deinsteins/pasarin-web/backend/internal/category/repository"
 	"github.com/deinsteins/pasarin-web/backend/internal/category/service"
 	"github.com/deinsteins/pasarin-web/backend/internal/database"
 	"github.com/deinsteins/pasarin-web/backend/internal/middleware"
-	"github.com/deinsteins/pasarin-web/backend/internal/seller/handler"
+	sellerHandler "github.com/deinsteins/pasarin-web/backend/internal/seller/handler"
 	"github.com/deinsteins/pasarin-web/backend/internal/seller/repository"
 	"github.com/deinsteins/pasarin-web/backend/internal/seller/service"
+	productHandler "github.com/deinsteins/pasarin-web/backend/internal/product/handler"
+	"github.com/deinsteins/pasarin-web/backend/internal/product/repository"
+	"github.com/deinsteins/pasarin-web/backend/internal/product/service"
 )
 
 func main() {
@@ -35,11 +38,15 @@ func main() {
 
 	categoryRepo := repository.NewCategoryRepository(db)
 	categoryService := service.NewCategoryService(categoryRepo)
-	categoryHandler := handler.NewCategoryHandler(categoryService)
+	categoryHandler := categoryHandler.NewCategoryHandler(categoryService)
 
 	sellerRepo := repository.NewSellerRepository(db)
 	sellerService := service.NewSellerService(sellerRepo)
-	sellerHandler := handler.NewSellerHandler(sellerService)
+	sellerHandler := sellerHandler.NewSellerHandler(sellerService)
+
+	productRepo := repository.NewProductRepository(db)
+	productService := service.NewProductService(productRepo)
+	productHandler := productHandler.NewProductHandler(productService)
 
 	app := fiber.New()
 
@@ -59,6 +66,12 @@ func main() {
 	app.Get("/api/sellers/:id", sellerHandler.GetByID)
 	app.Put("/api/sellers/:id", sellerHandler.Update)
 	app.Delete("/api/sellers/:id", sellerHandler.Delete)
+
+	app.Post("/api/products", productHandler.Create)
+	app.Get("/api/products", productHandler.GetAll)
+	app.Get("/api/products/:id", productHandler.GetByID)
+	app.Put("/api/products/:id", productHandler.Update)
+	app.Delete("/api/products/:id", productHandler.Delete)
 
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
