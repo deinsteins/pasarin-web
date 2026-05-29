@@ -42,6 +42,20 @@ func (s *ProductService) GetAll() ([]models.Product, error) {
 	return s.repo.FindAll()
 }
 
+func (s *ProductService) GetWithPagination(page, limit int, sort string) ([]models.Product, int64, error) {
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	return s.repo.FindWithPagination(page, limit, sort)
+}
+
 func (s *ProductService) GetByID(id uint) (*models.Product, error) {
 	return s.repo.FindByID(id)
 }

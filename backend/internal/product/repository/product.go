@@ -23,6 +23,35 @@ func (r *ProductRepository) FindAll() ([]models.Product, error) {
 	return products, err
 }
 
+func (r *ProductRepository) FindWithPagination(page, limit int, sort string) ([]models.Product, int64, error) {
+	var products []models.Product
+	var total int64
+
+	r.db.DB().Model(&models.Product{}).Count(&total)
+
+	offset := (page - 1) * limit
+
+	query := r.db.DB().Preload("Seller").Preload("Category")
+
+	switch sort {
+	case "latest":
+		query = query.Order("created_at DESC")
+	case "oldest":
+		query = query.Order("created_at ASC")
+	case "price_asc":
+		query = query.Order("price ASC")
+	case "price_desc":
+		query = query.Order("price DESC")
+	case "name":
+		query = query.Order("name ASC")
+	default:
+		query = query.Order("created_at DESC")
+	}
+
+	err := query.Offset(offset).Limit(limit).Find(&products).Error
+	return products, total, err
+}
+
 func (r *ProductRepository) FindByID(id uint) (*models.Product, error) {
 	var product models.Product
 	err := r.db.DB().Preload("Seller").Preload("Category").First(&product, id).Error

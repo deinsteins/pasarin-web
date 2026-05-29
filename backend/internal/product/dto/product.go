@@ -37,3 +37,15 @@ type ProductResponse struct {
 	CreatedAt   string  `json:"created_at"`
 	UpdatedAt   string  `json:"updated_at"`
 }
+
+type PaginationMeta struct {
+	Page   int   `json:"page"`
+	Limit  int   `json:"limit"`
+	Total  int64 `json:"total"`
+	TotalPages int64 `json:"total_pages"`
+}
+
+type PaginatedProductResponse struct {
+	Data []ProductResponse `json:"data"`
+	Meta PaginationMeta    `json:"meta"`
+}

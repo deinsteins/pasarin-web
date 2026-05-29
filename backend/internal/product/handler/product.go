@@ -48,16 +48,20 @@ func (h *ProductHandler) Create(c *fiber.Ctx) error {
 }
 
 func (h *ProductHandler) GetAll(c *fiber.Ctx) error {
-	products, err := h.service.GetAll()
+	page := c.QueryInt("page", 1)
+	limit := c.QueryInt("limit", 10)
+	sort := c.Query("sort", "latest")
+
+	products, total, err := h.service.GetWithPagination(page, limit, sort)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to fetch products",
 		})
 	}
 
-	var response []dto.ProductResponse
+	var data []dto.ProductResponse
 	for _, product := range products {
-		response = append(response, dto.ProductResponse{
+		data = append(data, dto.ProductResponse{
 			ID:          product.ID,
 			SellerID:    product.SellerID,
 			CategoryID:  product.CategoryID,
@@ -74,7 +78,20 @@ func (h *ProductHandler) GetAll(c *fiber.Ctx) error {
 		})
 	}
 
-	return c.Status(fiber.StatusOK).JSON(response)
+	totalPages := total / int64(limit)
+	if total%int64(limit) != 0 {
+		totalPages++
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.PaginatedProductResponse{
+		Data: data,
+		Meta: dto.PaginationMeta{
+			Page:       page,
+			Limit:      limit,
+			Total:      total,
+			TotalPages: totalPages,
+		},
+	})
 }
 
 func (h *ProductHandler) GetByID(c *fiber.Ctx) error {
