@@ -23,19 +23,29 @@ type UpdateProductRequest struct {
 }
 
 type ProductResponse struct {
-	ID          uint    `json:"id"`
-	SellerID    uint    `json:"seller_id"`
-	CategoryID  uint    `json:"category_id"`
-	Name        string  `json:"name"`
-	Slug        string  `json:"slug"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price"`
-	Stock       int     `json:"stock"`
-	Unit        string  `json:"unit"`
-	ImageURL    string  `json:"image_url"`
-	IsActive    bool    `json:"is_active"`
-	CreatedAt   string  `json:"created_at"`
-	UpdatedAt   string  `json:"updated_at"`
+	ID          uint           `json:"id"`
+	Name        string         `json:"name"`
+	Slug        string         `json:"slug"`
+	Description string         `json:"description"`
+	Price       float64        `json:"price"`
+	Stock       int            `json:"stock"`
+	Unit        string         `json:"unit"`
+	ImageURL    string         `json:"image_url"`
+	IsActive    bool           `json:"is_active"`
+	CreatedAt   string         `json:"created_at"`
+	UpdatedAt   string         `json:"updated_at"`
+	Seller      SellerResponse `json:"seller"`
+	Category    CategoryResponse `json:"category"`
+}
+
+type SellerResponse struct {
+	ID        uint   `json:"id"`
+	StoreName string `json:"store_name"`
+}
+
+type CategoryResponse struct {
+	ID   uint   `json:"id"`
+	Name string `json:"name"`
 }
 
 type PaginationMeta struct {

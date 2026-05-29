@@ -32,8 +32,6 @@ func (h *ProductHandler) Create(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusCreated).JSON(dto.ProductResponse{
 		ID:          product.ID,
-		SellerID:    product.SellerID,
-		CategoryID:  product.CategoryID,
 		Name:        product.Name,
 		Slug:        product.Slug,
 		Description: product.Description,
@@ -44,6 +42,14 @@ func (h *ProductHandler) Create(c *fiber.Ctx) error {
 		IsActive:    product.IsActive,
 		CreatedAt:   product.CreatedAt.String(),
 		UpdatedAt:   product.UpdatedAt.String(),
+		Seller: dto.SellerResponse{
+			ID:        product.Seller.ID,
+			StoreName: product.Seller.StoreName,
+		},
+		Category: dto.CategoryResponse{
+			ID:   product.Category.ID,
+			Name: product.Category.Name,
+		},
 	})
 }
 
@@ -63,8 +69,6 @@ func (h *ProductHandler) GetAll(c *fiber.Ctx) error {
 	for _, product := range products {
 		data = append(data, dto.ProductResponse{
 			ID:          product.ID,
-			SellerID:    product.SellerID,
-			CategoryID:  product.CategoryID,
 			Name:        product.Name,
 			Slug:        product.Slug,
 			Description: product.Description,
@@ -75,6 +79,14 @@ func (h *ProductHandler) GetAll(c *fiber.Ctx) error {
 			IsActive:    product.IsActive,
 			CreatedAt:   product.CreatedAt.String(),
 			UpdatedAt:   product.UpdatedAt.String(),
+			Seller: dto.SellerResponse{
+				ID:        product.Seller.ID,
+				StoreName: product.Seller.StoreName,
+			},
+			Category: dto.CategoryResponse{
+				ID:   product.Category.ID,
+				Name: product.Category.Name,
+			},
 		})
 	}
 
@@ -111,8 +123,6 @@ func (h *ProductHandler) GetByID(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(dto.ProductResponse{
 		ID:          product.ID,
-		SellerID:    product.SellerID,
-		CategoryID:  product.CategoryID,
 		Name:        product.Name,
 		Slug:        product.Slug,
 		Description: product.Description,
@@ -123,6 +133,14 @@ func (h *ProductHandler) GetByID(c *fiber.Ctx) error {
 		IsActive:    product.IsActive,
 		CreatedAt:   product.CreatedAt.String(),
 		UpdatedAt:   product.UpdatedAt.String(),
+		Seller: dto.SellerResponse{
+			ID:        product.Seller.ID,
+			StoreName: product.Seller.StoreName,
+		},
+		Category: dto.CategoryResponse{
+			ID:   product.Category.ID,
+			Name: product.Category.Name,
+		},
 	})
 }
 
@@ -151,8 +169,6 @@ func (h *ProductHandler) Update(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(dto.ProductResponse{
 		ID:          product.ID,
-		SellerID:    product.SellerID,
-		CategoryID:  product.CategoryID,
 		Name:        product.Name,
 		Slug:        product.Slug,
 		Description: product.Description,
@@ -163,6 +179,14 @@ func (h *ProductHandler) Update(c *fiber.Ctx) error {
 		IsActive:    product.IsActive,
 		CreatedAt:   product.CreatedAt.String(),
 		UpdatedAt:   product.UpdatedAt.String(),
+		Seller: dto.SellerResponse{
+			ID:        product.Seller.ID,
+			StoreName: product.Seller.StoreName,
+		},
+		Category: dto.CategoryResponse{
+			ID:   product.Category.ID,
+			Name: product.Category.Name,
+		},
 	})
 }
 
