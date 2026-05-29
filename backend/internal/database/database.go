@@ -10,7 +10,15 @@ import (
 	"gorm.io/gorm"
 )
 
-func Connect() (*gorm.DB, error) {
+type Database struct {
+	db *gorm.DB
+}
+
+func (d *Database) DB() *gorm.DB {
+	return d.db
+}
+
+func Connect() (*Database, error) {
 
 	dsn := fmt.Sprintf(
 		"host=%s user=%s password=%s dbname=%s port=%s sslmode=disable",
@@ -31,5 +39,5 @@ func Connect() (*gorm.DB, error) {
 		return nil, fmt.Errorf("failed to migrate database: %w", err)
 	}
 
-	return db, nil
+	return &Database{db: db}, nil
 }
