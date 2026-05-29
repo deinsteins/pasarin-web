@@ -7,6 +7,9 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/deinsteins/pasarin-web/backend/internal/auth"
+	"github.com/deinsteins/pasarin-web/backend/internal/category/handler"
+	"github.com/deinsteins/pasarin-web/backend/internal/category/repository"
+	"github.com/deinsteins/pasarin-web/backend/internal/category/service"
 	"github.com/deinsteins/pasarin-web/backend/internal/database"
 	"github.com/deinsteins/pasarin-web/backend/internal/middleware"
 )
@@ -27,12 +30,22 @@ func main() {
 	authService := auth.NewAuthService(db)
 	authHandler := auth.NewAuthHandler(authService)
 
+	categoryRepo := repository.NewCategoryRepository(db)
+	categoryService := service.NewCategoryService(categoryRepo)
+	categoryHandler := handler.NewCategoryHandler(categoryService)
+
 	app := fiber.New()
 
 	app.Post("/api/auth/register", authHandler.Register)
 	app.Post("/api/auth/login", authHandler.Login)
 
 	app.Get("/api/me", middleware.JWTAuthMiddleware(), authHandler.Me)
+
+	app.Post("/api/categories", categoryHandler.Create)
+	app.Get("/api/categories", categoryHandler.GetAll)
+	app.Get("/api/categories/:id", categoryHandler.GetByID)
+	app.Put("/api/categories/:id", categoryHandler.Update)
+	app.Delete("/api/categories/:id", categoryHandler.Delete)
 
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
