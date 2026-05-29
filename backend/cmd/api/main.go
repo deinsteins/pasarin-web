@@ -12,6 +12,9 @@ import (
 	"github.com/deinsteins/pasarin-web/backend/internal/category/service"
 	"github.com/deinsteins/pasarin-web/backend/internal/database"
 	"github.com/deinsteins/pasarin-web/backend/internal/middleware"
+	"github.com/deinsteins/pasarin-web/backend/internal/seller/handler"
+	"github.com/deinsteins/pasarin-web/backend/internal/seller/repository"
+	"github.com/deinsteins/pasarin-web/backend/internal/seller/service"
 )
 
 func main() {
@@ -34,6 +37,10 @@ func main() {
 	categoryService := service.NewCategoryService(categoryRepo)
 	categoryHandler := handler.NewCategoryHandler(categoryService)
 
+	sellerRepo := repository.NewSellerRepository(db)
+	sellerService := service.NewSellerService(sellerRepo)
+	sellerHandler := handler.NewSellerHandler(sellerService)
+
 	app := fiber.New()
 
 	app.Post("/api/auth/register", authHandler.Register)
@@ -46,6 +53,12 @@ func main() {
 	app.Get("/api/categories/:id", categoryHandler.GetByID)
 	app.Put("/api/categories/:id", categoryHandler.Update)
 	app.Delete("/api/categories/:id", categoryHandler.Delete)
+
+	app.Post("/api/sellers", sellerHandler.Create)
+	app.Get("/api/sellers", sellerHandler.GetAll)
+	app.Get("/api/sellers/:id", sellerHandler.GetByID)
+	app.Put("/api/sellers/:id", sellerHandler.Update)
+	app.Delete("/api/sellers/:id", sellerHandler.Delete)
 
 	app.Get("/health", func(c *fiber.Ctx) error {
 		return c.JSON(fiber.Map{
