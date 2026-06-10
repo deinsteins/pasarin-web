@@ -42,7 +42,7 @@ func (s *ProductService) GetAll() ([]models.Product, error) {
 	return s.repo.FindAll()
 }
 
-func (s *ProductService) GetWithPagination(page, limit int, sort, search string) ([]models.Product, int64, error) {
+func (s *ProductService) GetWithPagination(page, limit int, sort, search string, categoryID uint) ([]models.Product, int64, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -53,7 +53,7 @@ func (s *ProductService) GetWithPagination(page, limit int, sort, search string)
 		limit = 100
 	}
 
-	return s.repo.FindWithPagination(page, limit, sort, search)
+	return s.repo.FindWithPagination(page, limit, sort, search, categoryID)
 }
 
 func (s *ProductService) GetByID(id uint) (*models.Product, error) {

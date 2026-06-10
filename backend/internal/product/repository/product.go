@@ -23,7 +23,7 @@ func (r *ProductRepository) FindAll() ([]models.Product, error) {
 	return products, err
 }
 
-func (r *ProductRepository) FindWithPagination(page, limit int, sort, search string) ([]models.Product, int64, error) {
+func (r *ProductRepository) FindWithPagination(page, limit int, sort, search string, categoryID uint) ([]models.Product, int64, error) {
 	var products []models.Product
 	var total int64
 
@@ -32,6 +32,10 @@ func (r *ProductRepository) FindWithPagination(page, limit int, sort, search str
 	if search != "" {
 		like := "%" + search + "%"
 		base = base.Where("name ILIKE ? OR description ILIKE ?", like, like)
+	}
+
+	if categoryID > 0 {
+		base = base.Where("category_id = ?", categoryID)
 	}
 
 	base.Count(&total)
