@@ -107,8 +107,9 @@ func (h *ProductHandler) GetAll(c *fiber.Ctx) error {
 	page := c.QueryInt("page", 1)
 	limit := c.QueryInt("limit", 10)
 	sort := c.Query("sort", "latest")
+	search := strings.TrimSpace(c.Query("search", ""))
 
-	products, total, err := h.service.GetWithPagination(page, limit, sort)
+	products, total, err := h.service.GetWithPagination(page, limit, sort, search)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to fetch products",

@@ -23,15 +23,22 @@ func (r *ProductRepository) FindAll() ([]models.Product, error) {
 	return products, err
 }
 
-func (r *ProductRepository) FindWithPagination(page, limit int, sort string) ([]models.Product, int64, error) {
+func (r *ProductRepository) FindWithPagination(page, limit int, sort, search string) ([]models.Product, int64, error) {
 	var products []models.Product
 	var total int64
 
-	r.db.DB().Model(&models.Product{}).Count(&total)
+	base := r.db.DB().Model(&models.Product{})
+
+	if search != "" {
+		like := "%" + search + "%"
+		base = base.Where("name ILIKE ? OR description ILIKE ?", like, like)
+	}
+
+	base.Count(&total)
 
 	offset := (page - 1) * limit
 
-	query := r.db.DB().Preload("Seller").Preload("Category")
+	query := base.Preload("Seller").Preload("Category")
 
 	switch sort {
 	case "latest":
