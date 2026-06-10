@@ -1,6 +1,9 @@
 package handler
 
 import (
+	"net/url"
+	"strings"
+
 	"github.com/deinsteins/pasarin-web/backend/internal/product/dto"
 	"github.com/deinsteins/pasarin-web/backend/internal/product/service"
 	"github.com/gofiber/fiber/v2"
@@ -10,8 +13,31 @@ type ProductHandler struct {
 	service *service.ProductService
 }
 
-func NewProductHandler(service *service.ProductService) *ProductHandler {
-	return &ProductHandler{service: service}
+func NewProductHandler(svc *service.ProductService) *ProductHandler {
+	return &ProductHandler{service: svc}
+}
+
+func isValidImageURL(rawURL string) bool {
+	if rawURL == "" {
+		return true // optional
+	}
+	u, err := url.ParseRequestURI(rawURL)
+	if err != nil {
+		return false
+	}
+	if u.Scheme != "http" && u.Scheme != "https" {
+		return false
+	}
+	if u.Host == "" {
+		return false
+	}
+	ext := strings.ToLower(u.Path)
+	for _, valid := range []string{".jpg", ".jpeg", ".png", ".webp", ".gif"} {
+		if strings.HasSuffix(ext, valid) {
+			return true
+		}
+	}
+	return false
 }
 
 func (h *ProductHandler) Create(c *fiber.Ctx) error {
@@ -20,6 +46,30 @@ func (h *ProductHandler) Create(c *fiber.Ctx) error {
 	if err := c.BodyParser(&req); err != nil {
 		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 			"error": "Invalid request body",
+		})
+	}
+
+	if req.SellerID == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "seller_id is required"})
+	}
+	if req.CategoryID == 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "category_id is required"})
+	}
+	if req.Name == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "name is required"})
+	}
+	if req.Price <= 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "price must be greater than 0"})
+	}
+	if req.Stock < 0 {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "stock must be >= 0"})
+	}
+	if req.Unit == "" {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "unit is required"})
+	}
+	if !isValidImageURL(req.ImageURL) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "image_url must be a valid http/https URL ending in .jpg, .jpeg, .png, .webp, or .gif",
 		})
 	}
 
@@ -153,6 +203,19 @@ func (h *ProductHandler) Update(c *fiber.Ctx) error {
 	}
 
 	var req dto.UpdateProductRequest
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error":  "Invalid request body",
+			"detail": err.Error(),
+		})
+	}
+
+	if !isValidImageURL(req.ImageURL) {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "image_url must be a valid http/https URL ending in .jpg, .jpeg, .png, .webp, or .gif",
+		})
+	}
 
 	product, err := h.service.UpdatePartial(uint(id), req.CategoryID, req.Name, req.Description, req.Price, req.Stock, req.Unit, req.ImageURL, req.IsActive)
 	if err != nil {

@@ -12,12 +12,13 @@ import (
 	"github.com/deinsteins/pasarin-web/backend/internal/category/service"
 	"github.com/deinsteins/pasarin-web/backend/internal/database"
 	"github.com/deinsteins/pasarin-web/backend/internal/middleware"
-	sellerHandler "github.com/deinsteins/pasarin-web/backend/internal/seller/handler"
-	sellerRepository "github.com/deinsteins/pasarin-web/backend/internal/seller/repository"
-	sellerService "github.com/deinsteins/pasarin-web/backend/internal/seller/service"
 	productHandler "github.com/deinsteins/pasarin-web/backend/internal/product/handler"
 	productRepository "github.com/deinsteins/pasarin-web/backend/internal/product/repository"
 	productService "github.com/deinsteins/pasarin-web/backend/internal/product/service"
+	sellerHandler "github.com/deinsteins/pasarin-web/backend/internal/seller/handler"
+	sellerRepository "github.com/deinsteins/pasarin-web/backend/internal/seller/repository"
+	sellerService "github.com/deinsteins/pasarin-web/backend/internal/seller/service"
+	"github.com/deinsteins/pasarin-web/backend/internal/upload"
 )
 
 func main() {
@@ -72,6 +73,11 @@ func main() {
 	app.Get("/api/products/:id", productHandler.GetByID)
 	app.Put("/api/products/:id", productHandler.Update)
 	app.Delete("/api/products/:id", productHandler.Delete)
+
+	// Upload
+	uploadService := upload.NewUploadService()
+	uploadHandler := upload.NewUploadHandler(uploadService)
+	app.Post("/api/uploads", uploadHandler.Upload)
 
 	app.Get("/health", func(c *fiber.Ctx) error {	
 		return c.JSON(fiber.Map{
