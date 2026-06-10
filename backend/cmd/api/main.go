@@ -7,6 +7,9 @@ import (
 	"github.com/joho/godotenv"
 
 	"github.com/deinsteins/pasarin-web/backend/internal/auth"
+	addressHandler "github.com/deinsteins/pasarin-web/backend/internal/address/handler"
+	addressRepository "github.com/deinsteins/pasarin-web/backend/internal/address/repository"
+	addressService "github.com/deinsteins/pasarin-web/backend/internal/address/service"
 	categoryHandler "github.com/deinsteins/pasarin-web/backend/internal/category/handler"
 	"github.com/deinsteins/pasarin-web/backend/internal/category/repository"
 	"github.com/deinsteins/pasarin-web/backend/internal/category/service"
@@ -49,6 +52,10 @@ func main() {
 	productService := productService.NewProductService(productRepo)
 	productHandler := productHandler.NewProductHandler(productService)
 
+	addressRepo := addressRepository.NewAddressRepository(db)
+	addressService := addressService.NewAddressService(addressRepo)
+	addressHandler := addressHandler.NewAddressHandler(addressService)
+
 	app := fiber.New()
 
 	app.Post("/api/auth/register", authHandler.Register)
@@ -73,6 +80,12 @@ func main() {
 	app.Get("/api/products/:id", productHandler.GetByID)
 	app.Put("/api/products/:id", productHandler.Update)
 	app.Delete("/api/products/:id", productHandler.Delete)
+
+	app.Post("/api/addresses", middleware.JWTAuthMiddleware(), addressHandler.Create)
+	app.Get("/api/addresses", middleware.JWTAuthMiddleware(), addressHandler.GetAll)
+	app.Get("/api/addresses/:id", middleware.JWTAuthMiddleware(), addressHandler.GetByID)
+	app.Put("/api/addresses/:id", middleware.JWTAuthMiddleware(), addressHandler.Update)
+	app.Delete("/api/addresses/:id", middleware.JWTAuthMiddleware(), addressHandler.Delete)
 
 	// Upload
 	uploadService := upload.NewUploadService()
