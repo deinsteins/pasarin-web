@@ -13,11 +13,11 @@ import (
 	"github.com/deinsteins/pasarin-web/backend/internal/database"
 	"github.com/deinsteins/pasarin-web/backend/internal/middleware"
 	sellerHandler "github.com/deinsteins/pasarin-web/backend/internal/seller/handler"
-	"github.com/deinsteins/pasarin-web/backend/internal/seller/repository"
-	"github.com/deinsteins/pasarin-web/backend/internal/seller/service"
+	sellerRepository "github.com/deinsteins/pasarin-web/backend/internal/seller/repository"
+	sellerService "github.com/deinsteins/pasarin-web/backend/internal/seller/service"
 	productHandler "github.com/deinsteins/pasarin-web/backend/internal/product/handler"
-	"github.com/deinsteins/pasarin-web/backend/internal/product/repository"
-	"github.com/deinsteins/pasarin-web/backend/internal/product/service"
+	productRepository "github.com/deinsteins/pasarin-web/backend/internal/product/repository"
+	productService "github.com/deinsteins/pasarin-web/backend/internal/product/service"
 )
 
 func main() {
@@ -40,12 +40,12 @@ func main() {
 	categoryService := service.NewCategoryService(categoryRepo)
 	categoryHandler := categoryHandler.NewCategoryHandler(categoryService)
 
-	sellerRepo := repository.NewSellerRepository(db)
-	sellerService := service.NewSellerService(sellerRepo)
+	sellerRepo := sellerRepository.NewSellerRepository(db)
+	sellerService := sellerService.NewSellerService(sellerRepo)
 	sellerHandler := sellerHandler.NewSellerHandler(sellerService)
 
-	productRepo := repository.NewProductRepository(db)
-	productService := service.NewProductService(productRepo)
+	productRepo := productRepository.NewProductRepository(db)
+	productService := productService.NewProductService(productRepo)
 	productHandler := productHandler.NewProductHandler(productService)
 
 	app := fiber.New()
@@ -73,11 +73,24 @@ func main() {
 	app.Put("/api/products/:id", productHandler.Update)
 	app.Delete("/api/products/:id", productHandler.Delete)
 
-	app.Get("/health", func(c *fiber.Ctx) error {
+	app.Get("/health", func(c *fiber.Ctx) error {	
 		return c.JSON(fiber.Map{
 			"status": "ok",
 		})
 	})
+
+	// Swagger JSON endpoint
+	app.Get("/swagger.json", func(c *fiber.Ctx) error {
+		return c.SendFile("./docs/swagger.json")
+	})
+
+	// Swagger UI redirect
+	app.Get("/swagger", func(c *fiber.Ctx) error {
+		return c.SendFile("./docs/index.html")
+	})
+
+	// Serve Swagger UI static files
+	app.Static("/swagger-ui", "./docs")
 
 	log.Fatal(app.Listen(":3000"))
 }

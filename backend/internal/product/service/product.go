@@ -66,14 +66,68 @@ func (s *ProductService) Update(id uint, categoryID uint, name, description stri
 		return nil, err
 	}
 
-	product.CategoryID = categoryID
-	product.Name = name
-	product.Slug = generateSlug(name)
-	product.Description = description
-	product.Price = price
-	product.Stock = stock
-	product.Unit = unit
-	product.ImageURL = imageURL
+	if categoryID > 0 {
+		product.CategoryID = categoryID
+	}
+	if name != "" {
+		product.Name = name
+		product.Slug = generateSlug(name)
+	}
+	if description != "" {
+		product.Description = description
+	}
+	if price > 0 {
+		product.Price = price
+	}
+	if stock >= 0 {
+		product.Stock = stock
+	}
+	if unit != "" {
+		product.Unit = unit
+	}
+	if imageURL != "" {
+		product.ImageURL = imageURL
+	}
+
+	if isActive != nil {
+		product.IsActive = *isActive
+	}
+
+	if err := s.repo.Update(product); err != nil {
+		return nil, err
+	}
+
+	return product, nil
+}
+
+func (s *ProductService) UpdatePartial(id uint, categoryID *uint, name *string, description string, price *float64, stock *int, unit *string, imageURL string, isActive *bool) (*models.Product, error) {
+	product, err := s.repo.FindByID(id)
+	if err != nil {
+		return nil, err
+	}
+
+	if categoryID != nil {
+		product.CategoryID = *categoryID
+	}
+	if name != nil {
+		product.Name = *name
+		product.Slug = generateSlug(*name)
+	}
+	if description != "" {
+		product.Description = description
+	}
+	if price != nil {
+		product.Price = *price
+	}
+	if stock != nil {
+		product.Stock = *stock
+	}
+	if unit != nil {
+		product.Unit = *unit
+	}
+	if imageURL != "" {
+		product.ImageURL = imageURL
+	}
 
 	if isActive != nil {
 		product.IsActive = *isActive

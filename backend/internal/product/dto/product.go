@@ -12,14 +12,14 @@ type CreateProductRequest struct {
 }
 
 type UpdateProductRequest struct {
-	CategoryID  uint    `json:"category_id" binding:"required"`
-	Name        string  `json:"name" binding:"required,min=1,max=100"`
-	Description string  `json:"description"`
-	Price       float64 `json:"price" binding:"required,gt=0"`
-	Stock       int     `json:"stock" binding:"gte=0"`
-	Unit        string  `json:"unit" binding:"required"`
-	ImageURL    string  `json:"image_url"`
-	IsActive    *bool   `json:"is_active"`
+	CategoryID  *uint    `json:"category_id"`
+	Name        *string  `json:"name"`
+	Description string   `json:"description"`
+	Price       *float64 `json:"price"`
+	Stock       *int     `json:"stock"`
+	Unit        *string  `json:"unit"`
+	ImageURL    string   `json:"image_url"`
+	IsActive    *bool    `json:"is_active"`
 }
 
 type ProductResponse struct {
