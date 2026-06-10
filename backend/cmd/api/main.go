@@ -10,6 +10,9 @@ import (
 	addressHandler "github.com/deinsteins/pasarin-web/backend/internal/address/handler"
 	addressRepository "github.com/deinsteins/pasarin-web/backend/internal/address/repository"
 	addressService "github.com/deinsteins/pasarin-web/backend/internal/address/service"
+	cartHandler "github.com/deinsteins/pasarin-web/backend/internal/cart/handler"
+	cartRepository "github.com/deinsteins/pasarin-web/backend/internal/cart/repository"
+	cartService "github.com/deinsteins/pasarin-web/backend/internal/cart/service"
 	categoryHandler "github.com/deinsteins/pasarin-web/backend/internal/category/handler"
 	"github.com/deinsteins/pasarin-web/backend/internal/category/repository"
 	"github.com/deinsteins/pasarin-web/backend/internal/category/service"
@@ -56,6 +59,10 @@ func main() {
 	addressService := addressService.NewAddressService(addressRepo)
 	addressHandler := addressHandler.NewAddressHandler(addressService)
 
+	cartRepo := cartRepository.NewCartRepository(db)
+	cartService := cartService.NewCartService(cartRepo)
+	cartHandler := cartHandler.NewCartHandler(cartService)
+
 	app := fiber.New()
 
 	app.Post("/api/auth/register", authHandler.Register)
@@ -86,6 +93,11 @@ func main() {
 	app.Get("/api/addresses/:id", middleware.JWTAuthMiddleware(), addressHandler.GetByID)
 	app.Put("/api/addresses/:id", middleware.JWTAuthMiddleware(), addressHandler.Update)
 	app.Delete("/api/addresses/:id", middleware.JWTAuthMiddleware(), addressHandler.Delete)
+
+	app.Post("/api/cart/items", middleware.JWTAuthMiddleware(), cartHandler.AddToCart)
+	app.Get("/api/cart", middleware.JWTAuthMiddleware(), cartHandler.GetCart)
+	app.Put("/api/cart/items/:id", middleware.JWTAuthMiddleware(), cartHandler.UpdateCartItem)
+	app.Delete("/api/cart/items/:id", middleware.JWTAuthMiddleware(), cartHandler.DeleteCartItem)
 
 	// Upload
 	uploadService := upload.NewUploadService()
