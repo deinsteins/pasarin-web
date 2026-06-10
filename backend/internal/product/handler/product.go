@@ -150,10 +150,10 @@ func (h *ProductHandler) GetAll(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(dto.PaginatedProductResponse{
 		Data: data,
 		Meta: dto.PaginationMeta{
-			Page:       page,
-			Limit:      limit,
-			Total:      total,
-			TotalPages: totalPages,
+			Page:     page,
+			Limit:    limit,
+			Total:    total,
+			LastPage: totalPages,
 		},
 	})
 }

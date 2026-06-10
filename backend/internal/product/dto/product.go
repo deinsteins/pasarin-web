@@ -49,10 +49,10 @@ type CategoryResponse struct {
 }
 
 type PaginationMeta struct {
-	Page   int   `json:"page"`
-	Limit  int   `json:"limit"`
-	Total  int64 `json:"total"`
-	TotalPages int64 `json:"total_pages"`
+	Page     int   `json:"page"`
+	Limit    int   `json:"limit"`
+	Total    int64 `json:"total"`
+	LastPage int64 `json:"last_page"`
 }
 
 type PaginatedProductResponse struct {
