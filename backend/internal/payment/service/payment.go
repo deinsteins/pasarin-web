@@ -117,3 +117,17 @@ func (s *PaymentService) ProcessMayarWebhook(externalID string, mayarStatus stri
 		return nil
 	})
 }
+
+func (s *PaymentService) GetPaymentDetail(id uint, userID uint) (*dto.PaymentDetailResponse, error) {
+	paymentModel, err := s.paymentRepo.GetPaymentByIDAndUserID(id, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.PaymentDetailResponse{
+		ID:         paymentModel.ID,
+		Amount:     paymentModel.Amount,
+		Status:     paymentModel.Status,
+		PaymentURL: paymentModel.PaymentURL,
+	}, nil
+}
