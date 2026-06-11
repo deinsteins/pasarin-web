@@ -116,6 +116,7 @@ func main() {
 	app.Put("/api/products/:id", productHandler.Update)
 	app.Delete("/api/products/:id", productHandler.Delete)
 	app.Post("/api/seller/products/:id/stock", middleware.JWTAuthMiddleware(), inventoryHandlerInst.AdjustStock)
+	app.Get("/api/seller/products/:id/stock-history", middleware.JWTAuthMiddleware(), inventoryHandlerInst.GetStockHistory)
 
 	app.Post("/api/addresses", middleware.JWTAuthMiddleware(), addressHandler.Create)
 	app.Get("/api/addresses", middleware.JWTAuthMiddleware(), addressHandler.GetAll)

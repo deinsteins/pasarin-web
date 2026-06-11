@@ -50,3 +50,35 @@ func (h *InventoryHandler) AdjustStock(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(resp)
 }
+
+func (h *InventoryHandler) GetStockHistory(c *fiber.Ctx) error {
+	userIDVal := c.Locals("user_id")
+	if userIDVal == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+	userID := userIDVal.(uint)
+
+	productID, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid product ID"})
+	}
+
+	page := c.QueryInt("page", 1)
+	limit := c.QueryInt("limit", 10)
+
+	resp, err := h.service.GetStockHistory(userID, uint(productID), page, limit)
+	if err != nil {
+		switch err.Error() {
+		case "unauthorized":
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Access denied. Seller profile required."})
+		case "forbidden":
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "You do not own this product."})
+		case "product not found":
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Product not found"})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get stock history: " + err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(resp)
+}
+

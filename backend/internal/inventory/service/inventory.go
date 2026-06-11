@@ -81,3 +81,69 @@ func (s *InventoryService) AdjustStock(userID uint, productID uint, req dto.Stoc
 		CreatedAt:      movement.CreatedAt.String(),
 	}, nil
 }
+
+func (s *InventoryService) GetStockHistory(userID uint, productID uint, page, limit int) (*dto.PaginatedStockHistoryResponse, error) {
+	// 1. Authenticate seller
+	seller, err := s.sellerRepo.FindByUserID(userID)
+	if err != nil {
+		return nil, errors.New("unauthorized")
+	}
+
+	// 2. Verify product ownership
+	product, err := s.productRepo.FindByID(productID)
+	if err != nil {
+		return nil, errors.New("product not found")
+	}
+	if product.SellerID != seller.ID {
+		return nil, errors.New("forbidden")
+	}
+
+	// 3. Normalize pagination inputs
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	// 4. Query repository
+	movements, total, err := s.inventoryRepo.GetStockHistory(productID, page, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	// 5. Map to DTO
+	data := make([]dto.StockHistoryItemResponse, 0, len(movements))
+	for _, m := range movements {
+		data = append(data, dto.StockHistoryItemResponse{
+			ID:             m.ID,
+			ProductID:      m.ProductID,
+			Type:           m.Type,
+			QuantityBefore: m.QuantityBefore,
+			QuantityChange: m.QuantityChange,
+			QuantityAfter:  m.QuantityAfter,
+			Notes:          m.Notes,
+			CreatedBy:      m.CreatedBy,
+			CreatedAt:      m.CreatedAt.String(),
+		})
+	}
+
+	totalPages := total / int64(limit)
+	if total%int64(limit) != 0 {
+		totalPages++
+	}
+
+	return &dto.PaginatedStockHistoryResponse{
+		Data: data,
+		Meta: dto.PaginationMeta{
+			Page:     page,
+			Limit:    limit,
+			Total:    total,
+			LastPage: totalPages,
+		},
+	}, nil
+}
+

@@ -56,3 +56,23 @@ func (r *InventoryRepository) AdjustStock(productID uint, quantityChange int, mo
 
 	return &movement, nil
 }
+
+// GetStockHistory fetches paginated inventory movements for a product, sorted by created_at DESC.
+func (r *InventoryRepository) GetStockHistory(productID uint, page, limit int) ([]models.InventoryMovement, int64, error) {
+	var movements []models.InventoryMovement
+	var total int64
+
+	base := r.db.DB().Model(&models.InventoryMovement{}).Where("product_id = ?", productID)
+
+	if err := base.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * limit
+	if err := base.Order("created_at DESC").Limit(limit).Offset(offset).Find(&movements).Error; err != nil {
+		return nil, 0, err
+	}
+
+	return movements, total, nil
+}
+
