@@ -16,6 +16,7 @@ func NewOrderRepository(db *database.Database) *OrderRepository {
 func (r *OrderRepository) GetOrderByIDAndUserID(id uint, userID uint) (*models.Order, error) {
 	var order models.Order
 	err := r.db.DB().
+		Preload("User").
 		Preload("Address").
 		Preload("OrderItems").
 		Where("id = ? AND user_id = ?", id, userID).

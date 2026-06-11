@@ -30,6 +30,10 @@ import (
 	sellerRepository "github.com/deinsteins/pasarin-web/backend/internal/seller/repository"
 	sellerService "github.com/deinsteins/pasarin-web/backend/internal/seller/service"
 	"github.com/deinsteins/pasarin-web/backend/internal/upload"
+	payment "github.com/deinsteins/pasarin-web/backend/internal/payment"
+	paymentHandler "github.com/deinsteins/pasarin-web/backend/internal/payment/handler"
+	paymentRepository "github.com/deinsteins/pasarin-web/backend/internal/payment/repository"
+	paymentService "github.com/deinsteins/pasarin-web/backend/internal/payment/service"
 )
 
 func main() {
@@ -75,6 +79,11 @@ func main() {
 	orderServiceInst := orderService.NewOrderService(orderRepo)
 	orderHandlerInst := orderHandler.NewOrderHandler(orderServiceInst)
 
+	mayarProvider := payment.NewMayarProvider()
+	paymentRepo := paymentRepository.NewPaymentRepository(db)
+	paymentServiceInst := paymentService.NewPaymentService(db, orderRepo, paymentRepo, mayarProvider)
+	paymentHandlerInst := paymentHandler.NewPaymentHandler(paymentServiceInst)
+
 	app := fiber.New()
 
 	app.Post("/api/auth/register", authHandler.Register)
@@ -115,6 +124,8 @@ func main() {
 	app.Get("/api/orders/:id", middleware.JWTAuthMiddleware(), orderHandlerInst.GetByID)
 	app.Get("/api/orders", middleware.JWTAuthMiddleware(), orderHandlerInst.GetAll)
 	app.Get("/api/admin/orders", middleware.JWTAuthMiddleware(), orderHandlerInst.GetAdminOrders)
+	app.Post("/api/orders/:id/pay", middleware.JWTAuthMiddleware(), paymentHandlerInst.Pay)
+	app.Post("/api/webhooks/mayar", paymentHandlerInst.HandleMayarWebhook)
 
 	// Upload
 	uploadService := upload.NewUploadService()
