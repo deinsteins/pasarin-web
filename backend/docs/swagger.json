@@ -362,6 +362,248 @@
         }
       }
     },
+    "/api/seller/low-stock": {
+      "get": {
+        "tags": ["Seller"],
+        "summary": "Get low stock products for current seller",
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {"name": "page", "in": "query", "schema": {"type": "integer", "default": 1}},
+          {"name": "limit", "in": "query", "schema": {"type": "integer", "default": 10}}
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated low stock products",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {"type": "array"},
+                    "meta": {"type": "object"}
+                  }
+                }
+              }
+            }
+          },
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Access denied. Seller profile required."}
+        }
+      }
+    },
+    "/api/seller/dashboard": {
+      "get": {
+        "tags": ["Seller"],
+        "summary": "Get seller dashboard metrics",
+        "security": [{"BearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Seller dashboard metrics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total_products": {"type": "integer"},
+                    "total_orders": {"type": "integer"},
+                    "today_orders": {"type": "integer"},
+                    "today_revenue": {"type": "number"},
+                    "monthly_revenue": {"type": "number"},
+                    "low_stock_count": {"type": "integer"}
+                  }
+                }
+              }
+            }
+          },
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Access denied. Seller profile required."}
+        }
+      }
+    },
+    "/api/seller/dashboard/top-products": {
+      "get": {
+        "tags": ["Seller"],
+        "summary": "Get seller top selling products",
+        "security": [{"BearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Top products list",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "product_id": {"type": "integer"},
+                      "product_name": {"type": "string"},
+                      "sold_quantity": {"type": "integer"},
+                      "total_revenue": {"type": "number"}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Access denied. Seller profile required."}
+        }
+      }
+    },
+    "/api/seller/dashboard/revenue": {
+      "get": {
+        "tags": ["Seller"],
+        "summary": "Get seller daily revenue analytics for last 30 days",
+        "security": [{"BearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Daily revenue metrics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "properties": {
+                      "date": {"type": "string"},
+                      "revenue": {"type": "number"}
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Access denied. Seller profile required."}
+        }
+      }
+    },
+    "/api/admin/dashboard": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Get admin dashboard metrics",
+        "security": [{"BearerAuth": []}],
+        "responses": {
+          "200": {
+            "description": "Admin dashboard metrics",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "total_sellers": {"type": "integer"},
+                    "total_customers": {"type": "integer"},
+                    "total_products": {"type": "integer"},
+                    "total_orders": {"type": "integer"},
+                    "today_orders": {"type": "integer"},
+                    "today_revenue": {"type": "number"},
+                    "monthly_revenue": {"type": "number"}
+                  }
+                }
+              }
+            }
+          },
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Access denied. Admin role required."}
+        }
+      }
+    },
+    "/api/admin/orders": {
+      "get": {
+        "tags": ["Admin"],
+        "summary": "Get admin orders list with filters and pagination",
+        "security": [{"BearerAuth": []}],
+        "parameters": [
+          {"name": "page", "in": "query", "schema": {"type": "integer", "default": 1}},
+          {"name": "limit", "in": "query", "schema": {"type": "integer", "default": 10}},
+          {"name": "status", "in": "query", "schema": {"type": "string"}},
+          {"name": "seller_id", "in": "query", "schema": {"type": "integer"}},
+          {"name": "start_date", "in": "query", "schema": {"type": "string", "format": "date"}},
+          {"name": "end_date", "in": "query", "schema": {"type": "string", "format": "date"}}
+        ],
+        "responses": {
+          "200": {
+            "description": "Paginated list of orders",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "data": {
+                      "type": "array",
+                      "items": {
+                        "type": "object",
+                        "properties": {
+                          "id": {"type": "integer"},
+                          "order_number": {"type": "string"},
+                          "user_id": {"type": "integer"},
+                          "status": {"type": "string"},
+                          "subtotal": {"type": "number"},
+                          "delivery_fee": {"type": "number"},
+                          "total_amount": {"type": "number"},
+                          "notes": {"type": "string"},
+                          "created_at": {"type": "string"},
+                          "updated_at": {"type": "string"},
+                          "user": {
+                            "type": "object",
+                            "properties": {
+                              "id": {"type": "integer"},
+                              "name": {"type": "string"},
+                              "email": {"type": "string"},
+                              "role": {"type": "string"}
+                            }
+                          },
+                          "address": {
+                            "type": "object",
+                            "properties": {
+                              "id": {"type": "integer"},
+                              "label": {"type": "string"},
+                              "recipient_name": {"type": "string"},
+                              "recipient_phone": {"type": "string"},
+                              "province": {"type": "string"},
+                              "city": {"type": "string"},
+                              "district": {"type": "string"},
+                              "postal_code": {"type": "string"},
+                              "address": {"type": "string"}
+                            }
+                          },
+                          "items": {
+                            "type": "array",
+                            "items": {
+                              "type": "object",
+                              "properties": {
+                                "id": {"type": "integer"},
+                                "product_id": {"type": "integer"},
+                                "seller_id": {"type": "integer"},
+                                "product_name": {"type": "string"},
+                                "product_price": {"type": "number"},
+                                "quantity": {"type": "integer"},
+                                "subtotal": {"type": "number"}
+                              }
+                            }
+                          }
+                        }
+                      }
+                    },
+                    "meta": {
+                      "type": "object",
+                      "properties": {
+                        "page": {"type": "integer"},
+                        "limit": {"type": "integer"},
+                        "total": {"type": "integer"},
+                        "last_page": {"type": "integer"}
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "401": {"description": "Unauthorized"},
+          "403": {"description": "Access denied. Admin role required."}
+        }
+      }
+    },
     "/health": {
       "get": {
         "tags": ["Health"],
