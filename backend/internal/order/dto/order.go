@@ -1,0 +1,38 @@
+package dto
+
+type OrderDetailResponse struct {
+	ID          uint                `json:"id"`
+	OrderNumber string              `json:"order_number"`
+	UserID      uint                `json:"user_id"`
+	Status      string              `json:"status"`
+	Subtotal    float64             `json:"subtotal"`
+	DeliveryFee float64             `json:"delivery_fee"`
+	TotalAmount float64             `json:"total_amount"`
+	Notes       string              `json:"notes"`
+	CreatedAt   string              `json:"created_at"`
+	UpdatedAt   string              `json:"updated_at"`
+	Address     AddressResponse     `json:"address"`
+	Items       []OrderItemResponse `json:"items"`
+}
+
+type AddressResponse struct {
+	ID             uint   `json:"id"`
+	Label          string `json:"label"`
+	RecipientName  string `json:"recipient_name"`
+	RecipientPhone string `json:"recipient_phone"`
+	Province       string `json:"province"`
+	City           string `json:"city"`
+	District       string `json:"district"`
+	PostalCode     string `json:"postal_code"`
+	Address        string `json:"address"`
+}
+
+type OrderItemResponse struct {
+	ID           uint    `json:"id"`
+	ProductID    uint    `json:"product_id"`
+	SellerID     uint    `json:"seller_id"`
+	ProductName  string  `json:"product_name"`
+	ProductPrice float64 `json:"product_price"`
+	Quantity     int     `json:"quantity"`
+	Subtotal     float64 `json:"subtotal"`
+}

@@ -15,6 +15,9 @@ import (
 	cartService "github.com/deinsteins/pasarin-web/backend/internal/cart/service"
 	checkoutHandler "github.com/deinsteins/pasarin-web/backend/internal/checkout/handler"
 	checkoutService "github.com/deinsteins/pasarin-web/backend/internal/checkout/service"
+	orderHandler "github.com/deinsteins/pasarin-web/backend/internal/order/handler"
+	orderRepository "github.com/deinsteins/pasarin-web/backend/internal/order/repository"
+	orderService "github.com/deinsteins/pasarin-web/backend/internal/order/service"
 	categoryHandler "github.com/deinsteins/pasarin-web/backend/internal/category/handler"
 	"github.com/deinsteins/pasarin-web/backend/internal/category/repository"
 	"github.com/deinsteins/pasarin-web/backend/internal/category/service"
@@ -68,6 +71,10 @@ func main() {
 	checkoutServiceInst := checkoutService.NewCheckoutService(db)
 	checkoutHandlerInst := checkoutHandler.NewCheckoutHandler(checkoutServiceInst)
 
+	orderRepo := orderRepository.NewOrderRepository(db)
+	orderServiceInst := orderService.NewOrderService(orderRepo)
+	orderHandlerInst := orderHandler.NewOrderHandler(orderServiceInst)
+
 	app := fiber.New()
 
 	app.Post("/api/auth/register", authHandler.Register)
@@ -105,6 +112,7 @@ func main() {
 	app.Delete("/api/cart/items/:id", middleware.JWTAuthMiddleware(), cartHandler.DeleteCartItem)
 
 	app.Post("/api/checkout", middleware.JWTAuthMiddleware(), checkoutHandlerInst.Checkout)
+	app.Get("/api/orders/:id", middleware.JWTAuthMiddleware(), orderHandlerInst.GetByID)
 
 	// Upload
 	uploadService := upload.NewUploadService()
