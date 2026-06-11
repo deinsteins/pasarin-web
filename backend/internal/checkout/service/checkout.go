@@ -89,18 +89,8 @@ func (s *CheckoutService) Checkout(userID uint, req dto.CheckoutRequest) (*dto.C
 			return err
 		}
 
-		// 7. Create OrderItem records and decrement product stock
+		// 7. Create OrderItem records (stock is decremented on payment success instead)
 		for _, item := range cartItems {
-			// Decrement product stock and toggle availability
-			newStock := item.Product.Stock - item.Quantity
-			isAvailable := newStock > 0
-			if err := tx.Model(&models.Product{}).Where("id = ?", item.ProductID).Updates(map[string]interface{}{
-				"stock":        newStock,
-				"is_available": isAvailable,
-			}).Error; err != nil {
-				return err
-			}
-
 			// Create OrderItem snapshot
 			orderItem := models.OrderItem{
 				OrderID:      order.ID,

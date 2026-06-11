@@ -109,9 +109,9 @@ func (s *PaymentService) ProcessMayarWebhook(externalID string, mayarStatus stri
 			return err
 		}
 
-		// 3. Fetch current order status before updating
+		// 3. Fetch current order before updating
 		var currentOrder models.Order
-		if err := tx.Select("status").First(&currentOrder, p.OrderID).Error; err != nil {
+		if err := tx.First(&currentOrder, p.OrderID).Error; err != nil {
 			return err
 		}
 		fromStatus := currentOrder.Status
@@ -130,6 +130,54 @@ func (s *PaymentService) ProcessMayarWebhook(externalID string, mayarStatus stri
 		}
 		if err := tx.Create(&history).Error; err != nil {
 			return err
+		}
+
+		// 6. If order becomes paid, deduct stock and record inventory movement
+		if orderStatus == "paid" && fromStatus != "paid" {
+			var orderItems []models.OrderItem
+			if err := tx.Where("order_id = ?", p.OrderID).Find(&orderItems).Error; err != nil {
+				return err
+			}
+
+			for _, item := range orderItems {
+				// Lock product to prevent race condition
+				var product models.Product
+				if err := tx.Set("gorm:query_option", "FOR UPDATE").First(&product, item.ProductID).Error; err != nil {
+					return err
+				}
+
+				quantityBefore := product.Stock
+				quantityChange := -int(item.Quantity)
+				quantityAfter := quantityBefore + quantityChange
+
+				// Prevent negative stock
+				if quantityAfter < 0 {
+					return errors.New("insufficient stock for product: " + product.Name)
+				}
+
+				// Update stock and availability
+				isAvailable := quantityAfter > 0
+				if err := tx.Model(&product).Updates(map[string]interface{}{
+					"stock":        quantityAfter,
+					"is_available": isAvailable,
+				}).Error; err != nil {
+					return err
+				}
+
+				// Create InventoryMovement (type: order)
+				movement := models.InventoryMovement{
+					ProductID:      item.ProductID,
+					Type:           "order",
+					QuantityBefore: quantityBefore,
+					QuantityChange: quantityChange,
+					QuantityAfter:  quantityAfter,
+					Notes:          "Order payment success: #" + currentOrder.OrderNumber,
+					CreatedBy:      currentOrder.UserID,
+				}
+				if err := tx.Create(&movement).Error; err != nil {
+					return err
+				}
+			}
 		}
 
 		return nil
