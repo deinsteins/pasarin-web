@@ -46,3 +46,38 @@ func (r *OrderRepository) FindAllByUserID(userID uint, page int, limit int) ([]m
 
 	return orders, total, err
 }
+
+func (r *OrderRepository) GetAdminOrders(status string, page int, limit int) ([]models.Order, int64, error) {
+	var orders []models.Order
+	var total int64
+
+	query := r.db.DB().Model(&models.Order{})
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * limit
+	err := query.
+		Preload("User").
+		Preload("Address").
+		Preload("OrderItems").
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&orders).Error
+
+	return orders, total, err
+}
+
+func (r *OrderRepository) GetUserByID(userID uint) (*models.User, error) {
+	var user models.User
+	err := r.db.DB().First(&user, userID).Error
+	if err != nil {
+		return nil, err
+	}
+	return &user, nil
+}

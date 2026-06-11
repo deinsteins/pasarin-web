@@ -63,3 +63,35 @@ func (h *OrderHandler) GetAll(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(resp)
 }
+
+func (h *OrderHandler) GetAdminOrders(c *fiber.Ctx) error {
+	userIDVal := c.Locals("user_id")
+	if userIDVal == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+	userID := userIDVal.(uint)
+
+	page := c.QueryInt("page", 1)
+	limit := c.QueryInt("limit", 10)
+	status := c.Query("status", "")
+
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 10
+	}
+
+	resp, err := h.service.GetAdminOrderList(userID, status, page, limit)
+	if err != nil {
+		if err.Error() == "unauthorized" {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Access denied. Admin role required."})
+		}
+		if err.Error() == "user not found" {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": err.Error()})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to retrieve admin order list: " + err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(resp)
+}

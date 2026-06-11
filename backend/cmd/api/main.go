@@ -114,6 +114,7 @@ func main() {
 	app.Post("/api/checkout", middleware.JWTAuthMiddleware(), checkoutHandlerInst.Checkout)
 	app.Get("/api/orders/:id", middleware.JWTAuthMiddleware(), orderHandlerInst.GetByID)
 	app.Get("/api/orders", middleware.JWTAuthMiddleware(), orderHandlerInst.GetAll)
+	app.Get("/api/admin/orders", middleware.JWTAuthMiddleware(), orderHandlerInst.GetAdminOrders)
 
 	// Upload
 	uploadService := upload.NewUploadService()
