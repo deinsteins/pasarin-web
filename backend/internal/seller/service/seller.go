@@ -2,6 +2,7 @@ package service
 
 import (
 	"errors"
+	"time"
 
 	"github.com/deinsteins/pasarin-web/backend/internal/models"
 	"github.com/deinsteins/pasarin-web/backend/internal/seller/dto"
@@ -88,4 +89,16 @@ func (s *SellerService) GetTopProducts(userID uint) ([]dto.TopProductResponse, e
 	}
 
 	return s.repo.GetTopProducts(seller.ID)
+}
+
+func (s *SellerService) GetRevenueAnalytics(userID uint) ([]dto.SellerRevenueAnalyticsResponse, error) {
+	seller, err := s.repo.FindByUserID(userID)
+	if err != nil {
+		return nil, errors.New("unauthorized")
+	}
+
+	now := time.Now()
+	since := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location()).AddDate(0, 0, -29)
+
+	return s.repo.GetRevenueAnalytics(seller.ID, since)
 }

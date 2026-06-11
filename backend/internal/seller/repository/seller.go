@@ -132,3 +132,44 @@ func (r *SellerRepository) GetTopProducts(sellerID uint) ([]dto.TopProductRespon
 
 	return topProducts, nil
 }
+
+func (r *SellerRepository) GetRevenueAnalytics(sellerID uint, since time.Time) ([]dto.SellerRevenueAnalyticsResponse, error) {
+	var results []struct {
+		Date    time.Time `gorm:"column:date"`
+		Revenue float64   `gorm:"column:revenue"`
+	}
+
+	// GROUP BY DATE(orders.created_at) groups by date components.
+	err := r.db.DB().Table("order_items").
+		Select("DATE(orders.created_at) as date, SUM(order_items.subtotal) as revenue").
+		Joins("JOIN orders ON order_items.order_id = orders.id").
+		Where("order_items.seller_id = ? AND orders.status IN ('paid', 'confirmed', 'packed', 'delivered') AND orders.created_at >= ?", sellerID, since).
+		Group("DATE(orders.created_at)").
+		Order("date ASC").
+		Scan(&results).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	// Map database results
+	dbRevenue := make(map[string]float64)
+	for _, res := range results {
+		dateStr := res.Date.Format("2006-01-02")
+		dbRevenue[dateStr] = res.Revenue
+	}
+
+	// Generate all 30 days ending today, oldest first
+	var analytics []dto.SellerRevenueAnalyticsResponse
+	for i := 29; i >= 0; i-- {
+		d := time.Now().AddDate(0, 0, -i)
+		dateStr := d.Format("2006-01-02")
+		revenue := dbRevenue[dateStr] // defaults to 0.0 if not present
+		analytics = append(analytics, dto.SellerRevenueAnalyticsResponse{
+			Date:    dateStr,
+			Revenue: revenue,
+		})
+	}
+
+	return analytics, nil
+}

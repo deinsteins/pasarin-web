@@ -43,3 +43,8 @@ type TopProductResponse struct {
 	SoldQuantity int     `json:"sold_quantity"`
 	TotalRevenue float64 `json:"total_revenue"`
 }
+
+type SellerRevenueAnalyticsResponse struct {
+	Date    string  `json:"date"`
+	Revenue float64 `json:"revenue"`
+}
