@@ -36,6 +36,7 @@ func (s *ProductService) Create(sellerID, categoryID uint, name, description str
 		Unit:        unit,
 		ImageURL:    imageURL,
 		IsActive:    true,
+		IsAvailable: stock > 0,
 	}
 
 	if err := s.repo.Create(product); err != nil {
@@ -88,6 +89,7 @@ func (s *ProductService) Update(userID uint, id uint, categoryID uint, name, des
 	}
 	if stock >= 0 {
 		product.Stock = stock
+		product.IsAvailable = stock > 0
 	}
 	if unit != "" {
 		product.Unit = unit
@@ -128,6 +130,7 @@ func (s *ProductService) UpdatePartial(userID uint, id uint, categoryID *uint, n
 	}
 	if stock != nil {
 		product.Stock = *stock
+		product.IsAvailable = *stock > 0
 	}
 	if unit != nil {
 		product.Unit = *unit
@@ -219,6 +222,7 @@ func (s *ProductService) GetLowStockProducts(userID uint, page, limit int) (*dto
 			Description: product.Description,
 			Price:       product.Price,
 			Stock:       product.Stock,
+			IsAvailable: product.IsAvailable,
 			Unit:        product.Unit,
 			ImageURL:    product.ImageURL,
 			IsActive:    product.IsActive,

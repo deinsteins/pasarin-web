@@ -29,8 +29,12 @@ func (r *InventoryRepository) AdjustStock(productID uint, quantityChange int, mo
 		quantityBefore := product.Stock
 		quantityAfter := quantityBefore + quantityChange
 
-		// 2. Update product stock
-		if err := tx.Model(&product).Update("stock", quantityAfter).Error; err != nil {
+		// 2. Update product stock and availability
+		isAvailable := quantityAfter > 0
+		if err := tx.Model(&product).Updates(map[string]interface{}{
+			"stock":        quantityAfter,
+			"is_available": isAvailable,
+		}).Error; err != nil {
 			return err
 		}
 

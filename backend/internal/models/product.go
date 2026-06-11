@@ -14,6 +14,7 @@ type Product struct {
 	Unit        string    `gorm:"not null"`
 	ImageURL    string
 	IsActive    bool      `gorm:"default:true"`
+	IsAvailable bool      `gorm:"default:true"`
 	CreatedAt   time.Time `gorm:"autoCreateTime"`
 	UpdatedAt   time.Time `gorm:"autoUpdateTime"`
 

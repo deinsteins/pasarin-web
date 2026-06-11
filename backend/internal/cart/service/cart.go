@@ -110,6 +110,7 @@ func (s *CartService) GetCart(userID uint) (*dto.CartResponse, error) {
 				Description: item.Product.Description,
 				Price:       item.Product.Price,
 				Stock:       item.Product.Stock,
+				IsAvailable: item.Product.IsAvailable,
 				Unit:        item.Product.Unit,
 				ImageURL:    item.Product.ImageURL,
 				IsActive:    item.Product.IsActive,

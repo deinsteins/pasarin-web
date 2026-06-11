@@ -91,9 +91,13 @@ func (s *CheckoutService) Checkout(userID uint, req dto.CheckoutRequest) (*dto.C
 
 		// 7. Create OrderItem records and decrement product stock
 		for _, item := range cartItems {
-			// Decrement product stock
+			// Decrement product stock and toggle availability
 			newStock := item.Product.Stock - item.Quantity
-			if err := tx.Model(&models.Product{}).Where("id = ?", item.ProductID).Update("stock", newStock).Error; err != nil {
+			isAvailable := newStock > 0
+			if err := tx.Model(&models.Product{}).Where("id = ?", item.ProductID).Updates(map[string]interface{}{
+				"stock":        newStock,
+				"is_available": isAvailable,
+			}).Error; err != nil {
 				return err
 			}
 
