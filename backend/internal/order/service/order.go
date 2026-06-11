@@ -7,14 +7,19 @@ import (
 	"github.com/deinsteins/pasarin-web/backend/internal/models"
 	"github.com/deinsteins/pasarin-web/backend/internal/order/dto"
 	"github.com/deinsteins/pasarin-web/backend/internal/order/repository"
+	sellerRepository "github.com/deinsteins/pasarin-web/backend/internal/seller/repository"
 )
 
 type OrderService struct {
-	repo *repository.OrderRepository
+	repo       *repository.OrderRepository
+	sellerRepo *sellerRepository.SellerRepository
 }
 
-func NewOrderService(repo *repository.OrderRepository) *OrderService {
-	return &OrderService{repo: repo}
+func NewOrderService(repo *repository.OrderRepository, sellerRepo *sellerRepository.SellerRepository) *OrderService {
+	return &OrderService{
+		repo:       repo,
+		sellerRepo: sellerRepo,
+	}
 }
 
 func (s *OrderService) GetOrderDetail(id uint, userID uint) (*dto.OrderDetailResponse, error) {
@@ -185,4 +190,66 @@ func (s *OrderService) mapToOrderDetailResponse(order *models.Order) *dto.OrderD
 		Items:   itemsResponse,
 		Payment: paymentResponse,
 	}
+}
+
+func (s *OrderService) GetSellerOrderList(userID uint, status string, page int, limit int) (*dto.PaginatedSellerOrderResponse, error) {
+	// 1. Authenticate Seller by UserID
+	seller, err := s.sellerRepo.FindByUserID(userID)
+	if err != nil {
+		return nil, errors.New("unauthorized")
+	}
+
+	// 2. Query orders containing the seller's items
+	orders, total, err := s.repo.FindAllBySellerID(seller.ID, status, page, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	var data []dto.SellerOrderResponse = []dto.SellerOrderResponse{}
+	for _, order := range orders {
+		var itemResponses []dto.SellerOrderItemResponse = []dto.SellerOrderItemResponse{}
+		for _, item := range order.OrderItems {
+			itemResponses = append(itemResponses, dto.SellerOrderItemResponse{
+				ID:           item.ID,
+				ProductID:    item.ProductID,
+				ProductName:  item.ProductName,
+				ProductPrice: item.ProductPrice,
+				Quantity:     item.Quantity,
+				Subtotal:     item.Subtotal,
+			})
+		}
+
+		data = append(data, dto.SellerOrderResponse{
+			ID:          order.ID,
+			OrderNumber: order.OrderNumber,
+			Status:      order.Status,
+			Subtotal:    order.Subtotal,
+			DeliveryFee: order.DeliveryFee,
+			TotalAmount: order.TotalAmount,
+			Notes:       order.Notes,
+			CreatedAt:   order.CreatedAt.String(),
+			UpdatedAt:   order.UpdatedAt.String(),
+			Customer: dto.CustomerResponse{
+				ID:    order.User.ID,
+				Name:  order.User.Name,
+				Email: order.User.Email,
+			},
+			Items: itemResponses,
+		})
+	}
+
+	lastPage := int64(math.Ceil(float64(total) / float64(limit)))
+	if lastPage == 0 {
+		lastPage = 1
+	}
+
+	return &dto.PaginatedSellerOrderResponse{
+		Data: data,
+		Meta: dto.PaginationMeta{
+			Page:     page,
+			Limit:    limit,
+			Total:    total,
+			LastPage: lastPage,
+		},
+	}, nil
 }

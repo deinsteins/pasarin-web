@@ -82,3 +82,37 @@ type PaginatedAdminOrderResponse struct {
 	Data []AdminOrderResponse `json:"data"`
 	Meta PaginationMeta       `json:"meta"`
 }
+
+type CustomerResponse struct {
+	ID    uint   `json:"id"`
+	Name  string `json:"name"`
+	Email string `json:"email"`
+}
+
+type SellerOrderItemResponse struct {
+	ID           uint    `json:"id"`
+	ProductID    uint    `json:"product_id"`
+	ProductName  string  `json:"product_name"`
+	ProductPrice float64 `json:"product_price"`
+	Quantity     int     `json:"quantity"`
+	Subtotal     float64 `json:"subtotal"`
+}
+
+type SellerOrderResponse struct {
+	ID          uint                      `json:"id"`
+	OrderNumber string                    `json:"order_number"`
+	Status      string                    `json:"status"`
+	Subtotal    float64                   `json:"subtotal"`
+	DeliveryFee float64                   `json:"delivery_fee"`
+	TotalAmount float64                   `json:"total_amount"`
+	Notes       string                    `json:"notes"`
+	CreatedAt   string                    `json:"created_at"`
+	UpdatedAt   string                    `json:"updated_at"`
+	Customer    CustomerResponse          `json:"customer"`
+	Items       []SellerOrderItemResponse `json:"items"`
+}
+
+type PaginatedSellerOrderResponse struct {
+	Data []SellerOrderResponse `json:"data"`
+	Meta PaginationMeta        `json:"meta"`
+}

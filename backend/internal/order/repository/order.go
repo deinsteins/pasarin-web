@@ -83,3 +83,33 @@ func (r *OrderRepository) GetUserByID(userID uint) (*models.User, error) {
 	}
 	return &user, nil
 }
+
+func (r *OrderRepository) FindAllBySellerID(sellerID uint, status string, page int, limit int) ([]models.Order, int64, error) {
+	var orders []models.Order
+	var total int64
+
+	subQuery := r.db.DB().Model(&models.OrderItem{}).
+		Select("order_id").
+		Where("seller_id = ?", sellerID)
+
+	query := r.db.DB().Model(&models.Order{}).Where("id IN (?)", subQuery)
+
+	if status != "" {
+		query = query.Where("status = ?", status)
+	}
+
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * limit
+	err := query.
+		Preload("User").
+		Preload("OrderItems", "seller_id = ?", sellerID).
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&orders).Error
+
+	return orders, total, err
+}
