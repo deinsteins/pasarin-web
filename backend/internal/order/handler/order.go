@@ -38,3 +38,28 @@ func (h *OrderHandler) GetByID(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(resp)
 }
+
+func (h *OrderHandler) GetAll(c *fiber.Ctx) error {
+	userIDVal := c.Locals("user_id")
+	if userIDVal == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+	userID := userIDVal.(uint)
+
+	page := c.QueryInt("page", 1)
+	limit := c.QueryInt("limit", 10)
+
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 10
+	}
+
+	resp, err := h.service.GetOrderHistory(userID, page, limit)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to retrieve order history: " + err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(resp)
+}

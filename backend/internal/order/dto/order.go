@@ -36,3 +36,15 @@ type OrderItemResponse struct {
 	Quantity     int     `json:"quantity"`
 	Subtotal     float64 `json:"subtotal"`
 }
+
+type PaginationMeta struct {
+	Page     int   `json:"page"`
+	Limit    int   `json:"limit"`
+	Total    int64 `json:"total"`
+	LastPage int64 `json:"last_page"`
+}
+
+type PaginatedOrderResponse struct {
+	Data []OrderDetailResponse `json:"data"`
+	Meta PaginationMeta        `json:"meta"`
+}

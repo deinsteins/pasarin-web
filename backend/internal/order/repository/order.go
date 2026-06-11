@@ -13,18 +13,36 @@ func NewOrderRepository(db *database.Database) *OrderRepository {
 	return &OrderRepository{db: db}
 }
 
-func (r *OrderRepository) GetOrderByIDAndUserID(id uint, userID uint) (*models.Order, []models.OrderItem, error) {
+func (r *OrderRepository) GetOrderByIDAndUserID(id uint, userID uint) (*models.Order, error) {
 	var order models.Order
-	err := r.db.DB().Preload("Address").Where("id = ? AND user_id = ?", id, userID).First(&order).Error
+	err := r.db.DB().
+		Preload("Address").
+		Preload("OrderItems").
+		Where("id = ? AND user_id = ?", id, userID).
+		First(&order).Error
 	if err != nil {
-		return nil, nil, err
+		return nil, err
+	}
+	return &order, nil
+}
+
+func (r *OrderRepository) FindAllByUserID(userID uint, page int, limit int) ([]models.Order, int64, error) {
+	var orders []models.Order
+	var total int64
+
+	query := r.db.DB().Model(&models.Order{}).Where("user_id = ?", userID)
+	if err := query.Count(&total).Error; err != nil {
+		return nil, 0, err
 	}
 
-	var items []models.OrderItem
-	err = r.db.DB().Where("order_id = ?", order.ID).Find(&items).Error
-	if err != nil {
-		return nil, nil, err
-	}
+	offset := (page - 1) * limit
+	err := query.
+		Preload("Address").
+		Preload("OrderItems").
+		Order("created_at DESC").
+		Limit(limit).
+		Offset(offset).
+		Find(&orders).Error
 
-	return &order, items, nil
+	return orders, total, err
 }

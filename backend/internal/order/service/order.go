@@ -1,6 +1,9 @@
 package service
 
 import (
+	"math"
+
+	"github.com/deinsteins/pasarin-web/backend/internal/models"
 	"github.com/deinsteins/pasarin-web/backend/internal/order/dto"
 	"github.com/deinsteins/pasarin-web/backend/internal/order/repository"
 )
@@ -14,13 +17,44 @@ func NewOrderService(repo *repository.OrderRepository) *OrderService {
 }
 
 func (s *OrderService) GetOrderDetail(id uint, userID uint) (*dto.OrderDetailResponse, error) {
-	order, items, err := s.repo.GetOrderByIDAndUserID(id, userID)
+	order, err := s.repo.GetOrderByIDAndUserID(id, userID)
 	if err != nil {
 		return nil, err
 	}
 
+	return s.mapToOrderDetailResponse(order), nil
+}
+
+func (s *OrderService) GetOrderHistory(userID uint, page int, limit int) (*dto.PaginatedOrderResponse, error) {
+	orders, total, err := s.repo.FindAllByUserID(userID, page, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	var data []dto.OrderDetailResponse = []dto.OrderDetailResponse{}
+	for _, order := range orders {
+		data = append(data, *s.mapToOrderDetailResponse(&order))
+	}
+
+	lastPage := int64(math.Ceil(float64(total) / float64(limit)))
+	if lastPage == 0 {
+		lastPage = 1
+	}
+
+	return &dto.PaginatedOrderResponse{
+		Data: data,
+		Meta: dto.PaginationMeta{
+			Page:     page,
+			Limit:    limit,
+			Total:    total,
+			LastPage: lastPage,
+		},
+	}, nil
+}
+
+func (s *OrderService) mapToOrderDetailResponse(order *models.Order) *dto.OrderDetailResponse {
 	var itemsResponse []dto.OrderItemResponse = []dto.OrderItemResponse{}
-	for _, item := range items {
+	for _, item := range order.OrderItems {
 		itemsResponse = append(itemsResponse, dto.OrderItemResponse{
 			ID:           item.ID,
 			ProductID:    item.ProductID,
@@ -55,5 +89,5 @@ func (s *OrderService) GetOrderDetail(id uint, userID uint) (*dto.OrderDetailRes
 			Address:        order.Address.Address,
 		},
 		Items: itemsResponse,
-	}, nil
+	}
 }

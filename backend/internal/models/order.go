@@ -16,4 +16,5 @@ type Order struct {
 	Notes        string    `json:"notes"`
 	CreatedAt    time.Time `json:"created_at"`
 	UpdatedAt    time.Time `json:"updated_at"`
+	OrderItems   []OrderItem `gorm:"foreignKey:OrderID" json:"order_items,omitempty"`
 }
