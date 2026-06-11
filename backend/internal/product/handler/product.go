@@ -267,3 +267,59 @@ func (h *ProductHandler) Delete(c *fiber.Ctx) error {
 		"message": "Product deleted successfully",
 	})
 }
+
+func (h *ProductHandler) UpdatePrice(c *fiber.Ctx) error {
+	userIDVal := c.Locals("user_id")
+	if userIDVal == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+	userID := userIDVal.(uint)
+
+	productID, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid product ID"})
+	}
+
+	var req dto.UpdatePriceRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid request body"})
+	}
+
+	product, err := h.service.UpdatePrice(userID, uint(productID), req.Price)
+	if err != nil {
+		switch err.Error() {
+		case "unauthorized":
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Access denied. Seller profile required."})
+		case "forbidden":
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "You do not own this product."})
+		case "product not found":
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Product not found"})
+		case "price must be greater than zero":
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update price: " + err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.ProductResponse{
+		ID:          product.ID,
+		Name:        product.Name,
+		Slug:        product.Slug,
+		Description: product.Description,
+		Price:       product.Price,
+		Stock:       product.Stock,
+		Unit:        product.Unit,
+		ImageURL:    product.ImageURL,
+		IsActive:    product.IsActive,
+		CreatedAt:   product.CreatedAt.String(),
+		UpdatedAt:   product.UpdatedAt.String(),
+		Seller: dto.SellerResponse{
+			ID:        product.Seller.ID,
+			StoreName: product.Seller.StoreName,
+		},
+		Category: dto.CategoryResponse{
+			ID:   product.Category.ID,
+			Name: product.Category.Name,
+		},
+	})
+}
+

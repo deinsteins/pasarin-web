@@ -1,19 +1,26 @@
 package service
 
 import (
+	"errors"
 	"strings"
 
 	"github.com/deinsteins/pasarin-web/backend/internal/models"
 	"github.com/deinsteins/pasarin-web/backend/internal/product/repository"
+	sellerRepository "github.com/deinsteins/pasarin-web/backend/internal/seller/repository"
 )
 
 type ProductService struct {
-	repo *repository.ProductRepository
+	repo       *repository.ProductRepository
+	sellerRepo *sellerRepository.SellerRepository
 }
 
-func NewProductService(repo *repository.ProductRepository) *ProductService {
-	return &ProductService{repo: repo}
+func NewProductService(repo *repository.ProductRepository, sellerRepo *sellerRepository.SellerRepository) *ProductService {
+	return &ProductService{
+		repo:       repo,
+		sellerRepo: sellerRepo,
+	}
 }
+
 
 func (s *ProductService) Create(sellerID, categoryID uint, name, description string, price float64, stock int, unit, imageURL string) (*models.Product, error) {
 	slug := generateSlug(name)
@@ -153,4 +160,31 @@ func generateSlug(name string) string {
 	slug := strings.ToLower(name)
 	slug = strings.ReplaceAll(slug, " ", "-")
 	return slug
+}
+
+func (s *ProductService) UpdatePrice(userID uint, productID uint, newPrice float64) (*models.Product, error) {
+	if newPrice <= 0 {
+		return nil, errors.New("price must be greater than zero")
+	}
+
+	seller, err := s.sellerRepo.FindByUserID(userID)
+	if err != nil {
+		return nil, errors.New("unauthorized")
+	}
+
+	product, err := s.repo.FindByID(productID)
+	if err != nil {
+		return nil, errors.New("product not found")
+	}
+
+	if product.SellerID != seller.ID {
+		return nil, errors.New("forbidden")
+	}
+
+	product.Price = newPrice
+	if err := s.repo.Update(product); err != nil {
+		return nil, err
+	}
+
+	return product, nil
 }
