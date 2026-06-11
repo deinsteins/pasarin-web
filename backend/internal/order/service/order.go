@@ -58,7 +58,7 @@ func (s *OrderService) GetOrderHistory(userID uint, page int, limit int) (*dto.P
 	}, nil
 }
 
-func (s *OrderService) GetAdminOrderList(adminUserID uint, status string, page int, limit int) (*dto.PaginatedAdminOrderResponse, error) {
+func (s *OrderService) GetAdminOrderList(adminUserID uint, status string, sellerID uint, startDate string, endDate string, page int, limit int) (*dto.PaginatedAdminOrderResponse, error) {
 	// 1. Authorize Admin role
 	user, err := s.repo.GetUserByID(adminUserID)
 	if err != nil {
@@ -69,7 +69,7 @@ func (s *OrderService) GetAdminOrderList(adminUserID uint, status string, page i
 	}
 
 	// 2. Query admin orders
-	orders, total, err := s.repo.GetAdminOrders(status, page, limit)
+	orders, total, err := s.repo.GetAdminOrders(status, sellerID, startDate, endDate, page, limit)
 	if err != nil {
 		return nil, err
 	}

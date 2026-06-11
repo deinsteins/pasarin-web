@@ -1,6 +1,8 @@
 package repository
 
 import (
+	"time"
+
 	"github.com/deinsteins/pasarin-web/backend/internal/database"
 	"github.com/deinsteins/pasarin-web/backend/internal/models"
 	"gorm.io/gorm"
@@ -50,13 +52,29 @@ func (r *OrderRepository) FindAllByUserID(userID uint, page int, limit int) ([]m
 	return orders, total, err
 }
 
-func (r *OrderRepository) GetAdminOrders(status string, page int, limit int) ([]models.Order, int64, error) {
+func (r *OrderRepository) GetAdminOrders(status string, sellerID uint, startDate string, endDate string, page int, limit int) ([]models.Order, int64, error) {
 	var orders []models.Order
 	var total int64
 
 	query := r.db.DB().Model(&models.Order{})
 	if status != "" {
 		query = query.Where("status = ?", status)
+	}
+
+	if sellerID > 0 {
+		query = query.Where("orders.id IN (SELECT DISTINCT order_id FROM order_items WHERE seller_id = ?)", sellerID)
+	}
+
+	if startDate != "" {
+		if t, err := time.Parse("2006-01-02", startDate); err == nil {
+			query = query.Where("orders.created_at >= ?", t)
+		}
+	}
+
+	if endDate != "" {
+		if t, err := time.Parse("2006-01-02", endDate); err == nil {
+			query = query.Where("orders.created_at < ?", t.AddDate(0, 0, 1))
+		}
 	}
 
 	if err := query.Count(&total).Error; err != nil {

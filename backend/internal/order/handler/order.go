@@ -74,6 +74,9 @@ func (h *OrderHandler) GetAdminOrders(c *fiber.Ctx) error {
 	page := c.QueryInt("page", 1)
 	limit := c.QueryInt("limit", 10)
 	status := c.Query("status", "")
+	sellerID := uint(c.QueryInt("seller_id", 0))
+	startDate := c.Query("start_date", "")
+	endDate := c.Query("end_date", "")
 
 	if page < 1 {
 		page = 1
@@ -82,7 +85,7 @@ func (h *OrderHandler) GetAdminOrders(c *fiber.Ctx) error {
 		limit = 10
 	}
 
-	resp, err := h.service.GetAdminOrderList(userID, status, page, limit)
+	resp, err := h.service.GetAdminOrderList(userID, status, sellerID, startDate, endDate, page, limit)
 	if err != nil {
 		if err.Error() == "unauthorized" {
 			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Access denied. Admin role required."})
