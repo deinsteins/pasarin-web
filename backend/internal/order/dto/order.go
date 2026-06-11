@@ -116,3 +116,18 @@ type PaginatedSellerOrderResponse struct {
 	Data []SellerOrderResponse `json:"data"`
 	Meta PaginationMeta        `json:"meta"`
 }
+
+type SellerOrderDetailResponse struct {
+	ID          uint                      `json:"id"`
+	OrderNumber string                    `json:"order_number"`
+	Status      string                    `json:"status"`
+	Subtotal    float64                   `json:"subtotal"`
+	DeliveryFee float64                   `json:"delivery_fee"`
+	TotalAmount float64                   `json:"total_amount"`
+	Notes       string                    `json:"notes"`
+	CreatedAt   string                    `json:"created_at"`
+	UpdatedAt   string                    `json:"updated_at"`
+	Customer    CustomerResponse          `json:"customer"`
+	Address     AddressResponse           `json:"address"`
+	Items       []SellerOrderItemResponse `json:"items"`
+}

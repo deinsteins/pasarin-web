@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/deinsteins/pasarin-web/backend/internal/database"
 	"github.com/deinsteins/pasarin-web/backend/internal/models"
+	"gorm.io/gorm"
 )
 
 type OrderRepository struct {
@@ -112,4 +113,32 @@ func (r *OrderRepository) FindAllBySellerID(sellerID uint, status string, page i
 		Find(&orders).Error
 
 	return orders, total, err
+}
+
+func (r *OrderRepository) GetOrderByIDAndSellerID(id uint, sellerID uint) (*models.Order, error) {
+	var order models.Order
+
+	// Check if this order contains any items owned by the seller
+	var count int64
+	err := r.db.DB().Model(&models.OrderItem{}).
+		Where("order_id = ? AND seller_id = ?", id, sellerID).
+		Count(&count).Error
+	if err != nil {
+		return nil, err
+	}
+	if count == 0 {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	// Load the complete order preloading User (as customer), Address, and only this seller's OrderItems!
+	err = r.db.DB().
+		Preload("User").
+		Preload("Address").
+		Preload("OrderItems", "seller_id = ?", sellerID).
+		First(&order, id).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &order, nil
 }

@@ -253,3 +253,58 @@ func (s *OrderService) GetSellerOrderList(userID uint, status string, page int, 
 		},
 	}, nil
 }
+
+func (s *OrderService) GetSellerOrderDetail(userID uint, orderID uint) (*dto.SellerOrderDetailResponse, error) {
+	// 1. Authenticate Seller by UserID
+	seller, err := s.sellerRepo.FindByUserID(userID)
+	if err != nil {
+		return nil, errors.New("unauthorized")
+	}
+
+	// 2. Query order checking and preloading only this seller's items
+	order, err := s.repo.GetOrderByIDAndSellerID(orderID, seller.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	var itemResponses []dto.SellerOrderItemResponse = []dto.SellerOrderItemResponse{}
+	for _, item := range order.OrderItems {
+		itemResponses = append(itemResponses, dto.SellerOrderItemResponse{
+			ID:           item.ID,
+			ProductID:    item.ProductID,
+			ProductName:  item.ProductName,
+			ProductPrice: item.ProductPrice,
+			Quantity:     item.Quantity,
+			Subtotal:     item.Subtotal,
+		})
+	}
+
+	return &dto.SellerOrderDetailResponse{
+		ID:          order.ID,
+		OrderNumber: order.OrderNumber,
+		Status:      order.Status,
+		Subtotal:    order.Subtotal,
+		DeliveryFee: order.DeliveryFee,
+		TotalAmount: order.TotalAmount,
+		Notes:       order.Notes,
+		CreatedAt:   order.CreatedAt.String(),
+		UpdatedAt:   order.UpdatedAt.String(),
+		Customer: dto.CustomerResponse{
+			ID:    order.User.ID,
+			Name:  order.User.Name,
+			Email: order.User.Email,
+		},
+		Address: dto.AddressResponse{
+			ID:             order.Address.ID,
+			Label:          order.Address.Label,
+			RecipientName:  order.Address.RecipientName,
+			RecipientPhone: order.Address.RecipientPhone,
+			Province:       order.Address.Province,
+			City:           order.Address.City,
+			District:       order.Address.District,
+			PostalCode:     order.Address.PostalCode,
+			Address:        order.Address.Address,
+		},
+		Items: itemResponses,
+	}, nil
+}
