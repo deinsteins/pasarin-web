@@ -10,4 +10,5 @@ type PaymentDetailResponse struct {
 	Amount     float64 `json:"amount"`
 	Status     string  `json:"status"`
 	PaymentURL string  `json:"payment_url"`
+	ExternalID string  `json:"external_id"`
 }

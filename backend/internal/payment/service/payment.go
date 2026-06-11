@@ -129,5 +129,6 @@ func (s *PaymentService) GetPaymentDetail(id uint, userID uint) (*dto.PaymentDet
 		Amount:     paymentModel.Amount,
 		Status:     paymentModel.Status,
 		PaymentURL: paymentModel.PaymentURL,
+		ExternalID: paymentModel.ExternalID,
 	}, nil
 }
