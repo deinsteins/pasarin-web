@@ -67,7 +67,7 @@ func (s *ProductService) GetByID(id uint) (*models.Product, error) {
 	return s.repo.FindByID(id)
 }
 
-func (s *ProductService) Update(id uint, categoryID uint, name, description string, price float64, stock int, unit, imageURL string, isActive *bool) (*models.Product, error) {
+func (s *ProductService) Update(userID uint, id uint, categoryID uint, name, description string, price float64, stock int, unit, imageURL string, isActive *bool) (*models.Product, error) {
 	product, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, err
@@ -100,14 +100,14 @@ func (s *ProductService) Update(id uint, categoryID uint, name, description stri
 		product.IsActive = *isActive
 	}
 
-	if err := s.repo.Update(product); err != nil {
+	if err := s.repo.UpdateWithPriceHistory(product, userID); err != nil {
 		return nil, err
 	}
 
 	return product, nil
 }
 
-func (s *ProductService) UpdatePartial(id uint, categoryID *uint, name *string, description string, price *float64, stock *int, unit *string, imageURL string, isActive *bool) (*models.Product, error) {
+func (s *ProductService) UpdatePartial(userID uint, id uint, categoryID *uint, name *string, description string, price *float64, stock *int, unit *string, imageURL string, isActive *bool) (*models.Product, error) {
 	product, err := s.repo.FindByID(id)
 	if err != nil {
 		return nil, err
@@ -140,7 +140,7 @@ func (s *ProductService) UpdatePartial(id uint, categoryID *uint, name *string, 
 		product.IsActive = *isActive
 	}
 
-	if err := s.repo.Update(product); err != nil {
+	if err := s.repo.UpdateWithPriceHistory(product, userID); err != nil {
 		return nil, err
 	}
 
@@ -182,7 +182,7 @@ func (s *ProductService) UpdatePrice(userID uint, productID uint, newPrice float
 	}
 
 	product.Price = newPrice
-	if err := s.repo.Update(product); err != nil {
+	if err := s.repo.UpdateWithPriceHistory(product, userID); err != nil {
 		return nil, err
 	}
 

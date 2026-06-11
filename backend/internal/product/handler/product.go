@@ -219,7 +219,12 @@ func (h *ProductHandler) Update(c *fiber.Ctx) error {
 		})
 	}
 
-	product, err := h.service.UpdatePartial(uint(id), req.CategoryID, req.Name, req.Description, req.Price, req.Stock, req.Unit, req.ImageURL, req.IsActive)
+	var userID uint
+	if val := c.Locals("user_id"); val != nil {
+		userID = val.(uint)
+	}
+
+	product, err := h.service.UpdatePartial(userID, uint(id), req.CategoryID, req.Name, req.Description, req.Price, req.Stock, req.Unit, req.ImageURL, req.IsActive)
 	if err != nil {
 		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
 			"error": "Product not found",

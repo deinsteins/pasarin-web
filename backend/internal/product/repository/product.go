@@ -3,6 +3,7 @@ package repository
 import (
 	"github.com/deinsteins/pasarin-web/backend/internal/database"
 	"github.com/deinsteins/pasarin-web/backend/internal/models"
+	"gorm.io/gorm"
 )
 
 type ProductRepository struct {
@@ -78,4 +79,34 @@ func (r *ProductRepository) Update(product *models.Product) error {
 
 func (r *ProductRepository) Delete(id uint) error {
 	return r.db.DB().Delete(&models.Product{}, id).Error
+}
+
+func (r *ProductRepository) UpdateWithPriceHistory(product *models.Product, changedBy uint) error {
+	return r.db.DB().Transaction(func(tx *gorm.DB) error {
+		var oldProduct models.Product
+		if err := tx.First(&oldProduct, product.ID).Error; err != nil {
+			return err
+		}
+
+		oldPrice := oldProduct.Price
+		newPrice := product.Price
+
+		if err := tx.Save(product).Error; err != nil {
+			return err
+		}
+
+		if oldPrice != newPrice {
+			history := models.ProductPriceHistory{
+				ProductID: product.ID,
+				OldPrice:  oldPrice,
+				NewPrice:  newPrice,
+				ChangedBy: changedBy,
+			}
+			if err := tx.Create(&history).Error; err != nil {
+				return err
+			}
+		}
+
+		return nil
+	})
 }
