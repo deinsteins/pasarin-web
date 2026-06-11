@@ -36,3 +36,10 @@ type SellerDashboardResponse struct {
 	MonthlyRevenue float64 `json:"monthly_revenue"`
 	LowStockCount  int64   `json:"low_stock_count"`
 }
+
+type TopProductResponse struct {
+	ProductID    uint    `json:"product_id"`
+	ProductName  string  `json:"product_name"`
+	SoldQuantity int     `json:"sold_quantity"`
+	TotalRevenue float64 `json:"total_revenue"`
+}

@@ -113,3 +113,22 @@ func (r *SellerRepository) GetDashboardData(sellerID uint) (*dto.SellerDashboard
 		LowStockCount:  lowStockCount,
 	}, nil
 }
+
+func (r *SellerRepository) GetTopProducts(sellerID uint) ([]dto.TopProductResponse, error) {
+	var topProducts []dto.TopProductResponse
+
+	err := r.db.DB().Table("order_items").
+		Select("order_items.product_id, order_items.product_name, SUM(order_items.quantity) as sold_quantity, SUM(order_items.subtotal) as total_revenue").
+		Joins("JOIN orders ON order_items.order_id = orders.id").
+		Where("order_items.seller_id = ? AND orders.status IN ('paid', 'confirmed', 'packed', 'delivered')", sellerID).
+		Group("order_items.product_id, order_items.product_name").
+		Order("sold_quantity DESC").
+		Limit(10).
+		Scan(&topProducts).Error
+
+	if err != nil {
+		return nil, err
+	}
+
+	return topProducts, nil
+}

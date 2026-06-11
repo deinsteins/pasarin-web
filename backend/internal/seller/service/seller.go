@@ -80,3 +80,12 @@ func (s *SellerService) GetDashboard(userID uint) (*dto.SellerDashboardResponse,
 
 	return s.repo.GetDashboardData(seller.ID)
 }
+
+func (s *SellerService) GetTopProducts(userID uint) ([]dto.TopProductResponse, error) {
+	seller, err := s.repo.FindByUserID(userID)
+	if err != nil {
+		return nil, errors.New("unauthorized")
+	}
+
+	return s.repo.GetTopProducts(seller.ID)
+}

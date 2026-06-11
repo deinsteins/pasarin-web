@@ -169,3 +169,21 @@ func (h *SellerHandler) GetDashboard(c *fiber.Ctx) error {
 
 	return c.Status(fiber.StatusOK).JSON(resp)
 }
+
+func (h *SellerHandler) GetTopProducts(c *fiber.Ctx) error {
+	userIDVal := c.Locals("user_id")
+	if userIDVal == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+	userID := userIDVal.(uint)
+
+	resp, err := h.service.GetTopProducts(userID)
+	if err != nil {
+		if err.Error() == "unauthorized" {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Access denied. Seller profile required."})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get seller top products: " + err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(resp)
+}
