@@ -142,3 +142,27 @@ func (r *OrderRepository) GetOrderByIDAndSellerID(id uint, sellerID uint) (*mode
 
 	return &order, nil
 }
+
+func (r *OrderRepository) UpdateOrderStatus(id uint, status string) (*models.Order, error) {
+	var order models.Order
+	if err := r.db.DB().First(&order, id).Error; err != nil {
+		return nil, err
+	}
+
+	order.Status = status
+	if err := r.db.DB().Save(&order).Error; err != nil {
+		return nil, err
+	}
+
+	// Reload with preloads
+	err := r.db.DB().
+		Preload("User").
+		Preload("Address").
+		Preload("OrderItems").
+		First(&order, id).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return &order, nil
+}

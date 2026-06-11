@@ -151,3 +151,31 @@ func (h *OrderHandler) GetSellerOrderByID(c *fiber.Ctx) error {
 	return c.Status(fiber.StatusOK).JSON(resp)
 }
 
+func (h *OrderHandler) ConfirmSellerOrder(c *fiber.Ctx) error {
+	userIDVal := c.Locals("user_id")
+	if userIDVal == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{"error": "Unauthorized"})
+	}
+	userID := userIDVal.(uint)
+
+	id, err := c.ParamsInt("id")
+	if err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid order ID"})
+	}
+
+	resp, err := h.service.ConfirmSellerOrder(userID, uint(id))
+	if err != nil {
+		if err.Error() == "unauthorized" {
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Access denied. Seller profile required."})
+		}
+		if errors.Is(err, gorm.ErrRecordNotFound) {
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Order not found"})
+		}
+		if err.Error() == "order status must be paid to confirm" {
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": err.Error()})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to confirm order: " + err.Error()})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(resp)
+}
