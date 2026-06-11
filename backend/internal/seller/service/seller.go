@@ -1,7 +1,10 @@
 package service
 
 import (
+	"errors"
+
 	"github.com/deinsteins/pasarin-web/backend/internal/models"
+	"github.com/deinsteins/pasarin-web/backend/internal/seller/dto"
 	"github.com/deinsteins/pasarin-web/backend/internal/seller/repository"
 )
 
@@ -67,4 +70,13 @@ func (s *SellerService) Delete(id uint) error {
 	}
 
 	return s.repo.Delete(id)
+}
+
+func (s *SellerService) GetDashboard(userID uint) (*dto.SellerDashboardResponse, error) {
+	seller, err := s.repo.FindByUserID(userID)
+	if err != nil {
+		return nil, errors.New("unauthorized")
+	}
+
+	return s.repo.GetDashboardData(seller.ID)
 }

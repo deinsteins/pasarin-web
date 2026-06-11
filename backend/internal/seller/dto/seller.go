@@ -27,3 +27,12 @@ type SellerResponse struct {
 	CreatedAt  string `json:"created_at"`
 	UpdatedAt  string `json:"updated_at"`
 }
+
+type SellerDashboardResponse struct {
+	TotalProducts  int64   `json:"total_products"`
+	TotalOrders    int64   `json:"total_orders"`
+	TodayOrders    int64   `json:"today_orders"`
+	TodayRevenue   float64 `json:"today_revenue"`
+	MonthlyRevenue float64 `json:"monthly_revenue"`
+	LowStockCount  int64   `json:"low_stock_count"`
+}

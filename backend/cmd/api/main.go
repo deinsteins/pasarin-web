@@ -119,6 +119,7 @@ func main() {
 	app.Get("/api/seller/products/:id/stock-history", middleware.JWTAuthMiddleware(), inventoryHandlerInst.GetStockHistory)
 	app.Put("/api/seller/products/:id/price", middleware.JWTAuthMiddleware(), productHandler.UpdatePrice)
 	app.Get("/api/seller/low-stock", middleware.JWTAuthMiddleware(), productHandler.GetLowStock)
+	app.Get("/api/seller/dashboard", middleware.JWTAuthMiddleware(), sellerHandler.GetDashboard)
 
 	app.Post("/api/addresses", middleware.JWTAuthMiddleware(), addressHandler.Create)
 	app.Get("/api/addresses", middleware.JWTAuthMiddleware(), addressHandler.GetAll)
