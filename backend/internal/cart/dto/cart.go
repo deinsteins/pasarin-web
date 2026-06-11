@@ -29,6 +29,7 @@ type ProductResponse struct {
 	Description string         `json:"description"`
 	Price       float64        `json:"price"`
 	Stock       int            `json:"stock"`
+	IsAvailable bool           `json:"is_available"`
 	Unit        string         `json:"unit"`
 	ImageURL    string         `json:"image_url"`
 	IsActive    bool           `json:"is_active"`

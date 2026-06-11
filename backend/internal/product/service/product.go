@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"github.com/deinsteins/pasarin-web/backend/internal/models"
+	"github.com/deinsteins/pasarin-web/backend/internal/product/dto"
 	"github.com/deinsteins/pasarin-web/backend/internal/product/repository"
 	sellerRepository "github.com/deinsteins/pasarin-web/backend/internal/seller/repository"
 )
