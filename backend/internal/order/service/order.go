@@ -377,3 +377,141 @@ func (s *OrderService) ConfirmSellerOrder(userID uint, orderID uint) (*dto.Selle
 		Items: itemResponses,
 	}, nil
 }
+
+func (s *OrderService) PackSellerOrder(userID uint, orderID uint) (*dto.SellerOrderDetailResponse, error) {
+	// 1. Authenticate Seller by UserID
+	seller, err := s.sellerRepo.FindByUserID(userID)
+	if err != nil {
+		return nil, errors.New("unauthorized")
+	}
+
+	// 2. Verify order exists and belongs to this seller
+	order, err := s.repo.GetOrderByIDAndSellerID(orderID, seller.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. Validate current status is "confirmed"
+	if order.Status != "confirmed" {
+		return nil, errors.New("order status must be confirmed to pack")
+	}
+
+	// 4. Update status to "packed"
+	updatedOrder, err := s.repo.UpdateOrderStatus(order.ID, "packed")
+	if err != nil {
+		return nil, err
+	}
+
+	// 5. Map to response (filter items to only this seller's)
+	var itemResponses []dto.SellerOrderItemResponse = []dto.SellerOrderItemResponse{}
+	for _, item := range updatedOrder.OrderItems {
+		if item.SellerID == seller.ID {
+			itemResponses = append(itemResponses, dto.SellerOrderItemResponse{
+				ID:           item.ID,
+				ProductID:    item.ProductID,
+				ProductName:  item.ProductName,
+				ProductPrice: item.ProductPrice,
+				Quantity:     item.Quantity,
+				Subtotal:     item.Subtotal,
+			})
+		}
+	}
+
+	return &dto.SellerOrderDetailResponse{
+		ID:          updatedOrder.ID,
+		OrderNumber: updatedOrder.OrderNumber,
+		Status:      updatedOrder.Status,
+		Subtotal:    updatedOrder.Subtotal,
+		DeliveryFee: updatedOrder.DeliveryFee,
+		TotalAmount: updatedOrder.TotalAmount,
+		Notes:       updatedOrder.Notes,
+		CreatedAt:   updatedOrder.CreatedAt.String(),
+		UpdatedAt:   updatedOrder.UpdatedAt.String(),
+		Customer: dto.CustomerResponse{
+			ID:    updatedOrder.User.ID,
+			Name:  updatedOrder.User.Name,
+			Email: updatedOrder.User.Email,
+		},
+		Address: dto.AddressResponse{
+			ID:             updatedOrder.Address.ID,
+			Label:          updatedOrder.Address.Label,
+			RecipientName:  updatedOrder.Address.RecipientName,
+			RecipientPhone: updatedOrder.Address.RecipientPhone,
+			Province:       updatedOrder.Address.Province,
+			City:           updatedOrder.Address.City,
+			District:       updatedOrder.Address.District,
+			PostalCode:     updatedOrder.Address.PostalCode,
+			Address:        updatedOrder.Address.Address,
+		},
+		Items: itemResponses,
+	}, nil
+}
+
+func (s *OrderService) DeliverSellerOrder(userID uint, orderID uint) (*dto.SellerOrderDetailResponse, error) {
+	// 1. Authenticate Seller by UserID
+	seller, err := s.sellerRepo.FindByUserID(userID)
+	if err != nil {
+		return nil, errors.New("unauthorized")
+	}
+
+	// 2. Verify order exists and belongs to this seller
+	order, err := s.repo.GetOrderByIDAndSellerID(orderID, seller.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 3. Validate current status is "packed"
+	if order.Status != "packed" {
+		return nil, errors.New("order status must be packed to deliver")
+	}
+
+	// 4. Update status to "delivered"
+	updatedOrder, err := s.repo.UpdateOrderStatus(order.ID, "delivered")
+	if err != nil {
+		return nil, err
+	}
+
+	// 5. Map to response (filter items to only this seller's)
+	var itemResponses []dto.SellerOrderItemResponse = []dto.SellerOrderItemResponse{}
+	for _, item := range updatedOrder.OrderItems {
+		if item.SellerID == seller.ID {
+			itemResponses = append(itemResponses, dto.SellerOrderItemResponse{
+				ID:           item.ID,
+				ProductID:    item.ProductID,
+				ProductName:  item.ProductName,
+				ProductPrice: item.ProductPrice,
+				Quantity:     item.Quantity,
+				Subtotal:     item.Subtotal,
+			})
+		}
+	}
+
+	return &dto.SellerOrderDetailResponse{
+		ID:          updatedOrder.ID,
+		OrderNumber: updatedOrder.OrderNumber,
+		Status:      updatedOrder.Status,
+		Subtotal:    updatedOrder.Subtotal,
+		DeliveryFee: updatedOrder.DeliveryFee,
+		TotalAmount: updatedOrder.TotalAmount,
+		Notes:       updatedOrder.Notes,
+		CreatedAt:   updatedOrder.CreatedAt.String(),
+		UpdatedAt:   updatedOrder.UpdatedAt.String(),
+		Customer: dto.CustomerResponse{
+			ID:    updatedOrder.User.ID,
+			Name:  updatedOrder.User.Name,
+			Email: updatedOrder.User.Email,
+		},
+		Address: dto.AddressResponse{
+			ID:             updatedOrder.Address.ID,
+			Label:          updatedOrder.Address.Label,
+			RecipientName:  updatedOrder.Address.RecipientName,
+			RecipientPhone: updatedOrder.Address.RecipientPhone,
+			Province:       updatedOrder.Address.Province,
+			City:           updatedOrder.Address.City,
+			District:       updatedOrder.Address.District,
+			PostalCode:     updatedOrder.Address.PostalCode,
+			Address:        updatedOrder.Address.Address,
+		},
+		Items: itemResponses,
+	}, nil
+}

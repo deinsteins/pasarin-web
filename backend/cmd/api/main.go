@@ -127,6 +127,8 @@ func main() {
 	app.Get("/api/seller/orders", middleware.JWTAuthMiddleware(), orderHandlerInst.GetSellerOrders)
 	app.Get("/api/seller/orders/:id", middleware.JWTAuthMiddleware(), orderHandlerInst.GetSellerOrderByID)
 	app.Put("/api/seller/orders/:id/confirm", middleware.JWTAuthMiddleware(), orderHandlerInst.ConfirmSellerOrder)
+	app.Put("/api/seller/orders/:id/pack", middleware.JWTAuthMiddleware(), orderHandlerInst.PackSellerOrder)
+	app.Put("/api/seller/orders/:id/deliver", middleware.JWTAuthMiddleware(), orderHandlerInst.DeliverSellerOrder)
 	app.Post("/api/orders/:id/pay", middleware.JWTAuthMiddleware(), paymentHandlerInst.Pay)
 	app.Get("/api/payments/:id", middleware.JWTAuthMiddleware(), paymentHandlerInst.GetByID)
 	app.Post("/api/webhooks/mayar", paymentHandlerInst.HandleMayarWebhook)
