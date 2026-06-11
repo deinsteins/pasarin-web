@@ -37,6 +37,9 @@ import (
 	inventoryHandler "github.com/deinsteins/pasarin-web/backend/internal/inventory/handler"
 	inventoryRepository "github.com/deinsteins/pasarin-web/backend/internal/inventory/repository"
 	inventoryService "github.com/deinsteins/pasarin-web/backend/internal/inventory/service"
+	adminHandler "github.com/deinsteins/pasarin-web/backend/internal/admin/handler"
+	adminRepository "github.com/deinsteins/pasarin-web/backend/internal/admin/repository"
+	adminService "github.com/deinsteins/pasarin-web/backend/internal/admin/service"
 )
 
 func main() {
@@ -91,6 +94,10 @@ func main() {
 	inventoryServiceInst := inventoryService.NewInventoryService(inventoryRepo, productRepo, sellerRepo)
 	inventoryHandlerInst := inventoryHandler.NewInventoryHandler(inventoryServiceInst)
 
+	adminRepo := adminRepository.NewDashboardRepository(db)
+	adminServiceInst := adminService.NewDashboardService(adminRepo)
+	adminHandlerInst := adminHandler.NewDashboardHandler(adminServiceInst)
+
 	app := fiber.New()
 
 	app.Post("/api/auth/register", authHandler.Register)
@@ -122,6 +129,7 @@ func main() {
 	app.Get("/api/seller/dashboard", middleware.JWTAuthMiddleware(), sellerHandler.GetDashboard)
 	app.Get("/api/seller/dashboard/top-products", middleware.JWTAuthMiddleware(), sellerHandler.GetTopProducts)
 	app.Get("/api/seller/dashboard/revenue", middleware.JWTAuthMiddleware(), sellerHandler.GetRevenueAnalytics)
+	app.Get("/api/admin/dashboard", middleware.JWTAuthMiddleware(), adminHandlerInst.GetDashboard)
 
 	app.Post("/api/addresses", middleware.JWTAuthMiddleware(), addressHandler.Create)
 	app.Get("/api/addresses", middleware.JWTAuthMiddleware(), addressHandler.GetAll)
