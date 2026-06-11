@@ -328,7 +328,7 @@ func (s *OrderService) ConfirmSellerOrder(userID uint, orderID uint) (*dto.Selle
 	}
 
 	// 4. Update status to "confirmed"
-	updatedOrder, err := s.repo.UpdateOrderStatus(order.ID, "confirmed")
+	updatedOrder, err := s.repo.UpdateOrderStatus(order.ID, "confirmed", &userID)
 	if err != nil {
 		return nil, err
 	}
@@ -397,7 +397,7 @@ func (s *OrderService) PackSellerOrder(userID uint, orderID uint) (*dto.SellerOr
 	}
 
 	// 4. Update status to "packed"
-	updatedOrder, err := s.repo.UpdateOrderStatus(order.ID, "packed")
+	updatedOrder, err := s.repo.UpdateOrderStatus(order.ID, "packed", &userID)
 	if err != nil {
 		return nil, err
 	}
@@ -466,7 +466,7 @@ func (s *OrderService) DeliverSellerOrder(userID uint, orderID uint) (*dto.Selle
 	}
 
 	// 4. Update status to "delivered"
-	updatedOrder, err := s.repo.UpdateOrderStatus(order.ID, "delivered")
+	updatedOrder, err := s.repo.UpdateOrderStatus(order.ID, "delivered", &userID)
 	if err != nil {
 		return nil, err
 	}
@@ -513,5 +513,28 @@ func (s *OrderService) DeliverSellerOrder(userID uint, orderID uint) (*dto.Selle
 			Address:        updatedOrder.Address.Address,
 		},
 		Items: itemResponses,
+	}, nil
+}
+
+func (s *OrderService) GetOrderTimeline(userID uint, orderID uint) (*dto.OrderTimelineResponse, error) {
+	history, err := s.repo.GetOrderTimeline(orderID, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	var items []dto.OrderTimelineItemResponse = []dto.OrderTimelineItemResponse{}
+	for _, h := range history {
+		items = append(items, dto.OrderTimelineItemResponse{
+			ID:         h.ID,
+			FromStatus: h.FromStatus,
+			ToStatus:   h.ToStatus,
+			ChangedBy:  h.ChangedBy,
+			CreatedAt:  h.CreatedAt.String(),
+		})
+	}
+
+	return &dto.OrderTimelineResponse{
+		OrderID:  orderID,
+		Timeline: items,
 	}, nil
 }

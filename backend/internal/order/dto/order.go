@@ -131,3 +131,16 @@ type SellerOrderDetailResponse struct {
 	Address     AddressResponse           `json:"address"`
 	Items       []SellerOrderItemResponse `json:"items"`
 }
+
+type OrderTimelineItemResponse struct {
+	ID         uint    `json:"id"`
+	FromStatus string  `json:"from_status"`
+	ToStatus   string  `json:"to_status"`
+	ChangedBy  *uint   `json:"changed_by"`
+	CreatedAt  string  `json:"created_at"`
+}
+
+type OrderTimelineResponse struct {
+	OrderID  uint                        `json:"order_id"`
+	Timeline []OrderTimelineItemResponse `json:"timeline"`
+}

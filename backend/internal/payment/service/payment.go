@@ -109,8 +109,26 @@ func (s *PaymentService) ProcessMayarWebhook(externalID string, mayarStatus stri
 			return err
 		}
 
-		// 3. Update order status
+		// 3. Fetch current order status before updating
+		var currentOrder models.Order
+		if err := tx.Select("status").First(&currentOrder, p.OrderID).Error; err != nil {
+			return err
+		}
+		fromStatus := currentOrder.Status
+
+		// 4. Update order status
 		if err := tx.Model(&models.Order{}).Where("id = ?", p.OrderID).Update("status", orderStatus).Error; err != nil {
+			return err
+		}
+
+		// 5. Record status history (ChangedBy = nil → system/webhook)
+		history := models.OrderStatusHistory{
+			OrderID:    p.OrderID,
+			FromStatus: fromStatus,
+			ToStatus:   orderStatus,
+			ChangedBy:  nil,
+		}
+		if err := tx.Create(&history).Error; err != nil {
 			return err
 		}
 

@@ -143,26 +143,72 @@ func (r *OrderRepository) GetOrderByIDAndSellerID(id uint, sellerID uint) (*mode
 	return &order, nil
 }
 
-func (r *OrderRepository) UpdateOrderStatus(id uint, status string) (*models.Order, error) {
+func (r *OrderRepository) UpdateOrderStatus(id uint, status string, changedBy *uint) (*models.Order, error) {
 	var order models.Order
-	if err := r.db.DB().First(&order, id).Error; err != nil {
-		return nil, err
-	}
 
-	order.Status = status
-	if err := r.db.DB().Save(&order).Error; err != nil {
-		return nil, err
-	}
+	err := r.db.DB().Transaction(func(tx *gorm.DB) error {
+		// 1. Fetch current order to capture old status
+		if err := tx.First(&order, id).Error; err != nil {
+			return err
+		}
 
-	// Reload with preloads
-	err := r.db.DB().
-		Preload("User").
-		Preload("Address").
-		Preload("OrderItems").
-		First(&order, id).Error
+		fromStatus := order.Status
+
+		// 2. Update status
+		order.Status = status
+		if err := tx.Save(&order).Error; err != nil {
+			return err
+		}
+
+		// 3. Record history
+		history := models.OrderStatusHistory{
+			OrderID:    id,
+			FromStatus: fromStatus,
+			ToStatus:   status,
+			ChangedBy:  changedBy,
+		}
+		if err := tx.Create(&history).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
 	if err != nil {
 		return nil, err
 	}
 
+	// Reload with preloads after transaction
+	if err := r.db.DB().
+		Preload("User").
+		Preload("Address").
+		Preload("OrderItems").
+		First(&order, id).Error; err != nil {
+		return nil, err
+	}
+
 	return &order, nil
+}
+
+func (r *OrderRepository) GetOrderTimeline(orderID uint, userID uint) ([]models.OrderStatusHistory, error) {
+	// Verify ownership — order must belong to userID
+	var count int64
+	if err := r.db.DB().Model(&models.Order{}).
+		Where("id = ? AND user_id = ?", orderID, userID).
+		Count(&count).Error; err != nil {
+		return nil, err
+	}
+	if count == 0 {
+		return nil, gorm.ErrRecordNotFound
+	}
+
+	var history []models.OrderStatusHistory
+	err := r.db.DB().
+		Where("order_id = ?", orderID).
+		Order("created_at ASC").
+		Find(&history).Error
+	if err != nil {
+		return nil, err
+	}
+
+	return history, nil
 }
