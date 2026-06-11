@@ -110,3 +110,22 @@ func (r *ProductRepository) UpdateWithPriceHistory(product *models.Product, chan
 		return nil
 	})
 }
+
+// FindLowStockBySeller queries all products belonging to a seller where stock <= 5, with pagination support.
+func (r *ProductRepository) FindLowStockBySeller(sellerID uint, page, limit int) ([]models.Product, int64, error) {
+	var products []models.Product
+	var total int64
+
+	base := r.db.DB().Model(&models.Product{}).Where("seller_id = ? AND stock <= 5", sellerID)
+
+	if err := base.Count(&total).Error; err != nil {
+		return nil, 0, err
+	}
+
+	offset := (page - 1) * limit
+	err := base.Preload("Seller").Preload("Category").
+		Order("stock ASC, created_at DESC").
+		Limit(limit).Offset(offset).Find(&products).Error
+
+	return products, total, err
+}

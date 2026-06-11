@@ -188,3 +188,65 @@ func (s *ProductService) UpdatePrice(userID uint, productID uint, newPrice float
 
 	return product, nil
 }
+
+func (s *ProductService) GetLowStockProducts(userID uint, page, limit int) (*dto.PaginatedProductResponse, error) {
+	seller, err := s.sellerRepo.FindByUserID(userID)
+	if err != nil {
+		return nil, errors.New("unauthorized")
+	}
+
+	if page < 1 {
+		page = 1
+	}
+	if limit < 1 {
+		limit = 10
+	}
+	if limit > 100 {
+		limit = 100
+	}
+
+	products, total, err := s.repo.FindLowStockBySeller(seller.ID, page, limit)
+	if err != nil {
+		return nil, err
+	}
+
+	var data []dto.ProductResponse
+	for _, product := range products {
+		data = append(data, dto.ProductResponse{
+			ID:          product.ID,
+			Name:        product.Name,
+			Slug:        product.Slug,
+			Description: product.Description,
+			Price:       product.Price,
+			Stock:       product.Stock,
+			Unit:        product.Unit,
+			ImageURL:    product.ImageURL,
+			IsActive:    product.IsActive,
+			CreatedAt:   product.CreatedAt.String(),
+			UpdatedAt:   product.UpdatedAt.String(),
+			Seller: dto.SellerResponse{
+				ID:        product.Seller.ID,
+				StoreName: product.Seller.StoreName,
+			},
+			Category: dto.CategoryResponse{
+				ID:   product.Category.ID,
+				Name: product.Category.Name,
+			},
+		})
+	}
+
+	totalPages := total / int64(limit)
+	if total%int64(limit) != 0 {
+		totalPages++
+	}
+
+	return &dto.PaginatedProductResponse{
+		Data: data,
+		Meta: dto.PaginationMeta{
+			Page:     page,
+			Limit:    limit,
+			Total:    total,
+			LastPage: totalPages,
+		},
+	}, nil
+}
