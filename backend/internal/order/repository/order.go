@@ -19,6 +19,7 @@ func (r *OrderRepository) GetOrderByIDAndUserID(id uint, userID uint) (*models.O
 		Preload("User").
 		Preload("Address").
 		Preload("OrderItems").
+		Preload("Payments").
 		Where("id = ? AND user_id = ?", id, userID).
 		First(&order).Error
 	if err != nil {

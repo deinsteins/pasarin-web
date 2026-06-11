@@ -1,18 +1,19 @@
 package dto
 
 type OrderDetailResponse struct {
-	ID          uint                `json:"id"`
-	OrderNumber string              `json:"order_number"`
-	UserID      uint                `json:"user_id"`
-	Status      string              `json:"status"`
-	Subtotal    float64             `json:"subtotal"`
-	DeliveryFee float64             `json:"delivery_fee"`
-	TotalAmount float64             `json:"total_amount"`
-	Notes       string              `json:"notes"`
-	CreatedAt   string              `json:"created_at"`
-	UpdatedAt   string              `json:"updated_at"`
-	Address     AddressResponse     `json:"address"`
-	Items       []OrderItemResponse `json:"items"`
+	ID          uint                 `json:"id"`
+	OrderNumber string               `json:"order_number"`
+	UserID      uint                 `json:"user_id"`
+	Status      string               `json:"status"`
+	Subtotal    float64              `json:"subtotal"`
+	DeliveryFee float64              `json:"delivery_fee"`
+	TotalAmount float64              `json:"total_amount"`
+	Notes       string               `json:"notes"`
+	CreatedAt   string               `json:"created_at"`
+	UpdatedAt   string               `json:"updated_at"`
+	Address     AddressResponse      `json:"address"`
+	Items       []OrderItemResponse  `json:"items"`
+	Payment     *PaymentInfoResponse `json:"payment,omitempty"`
 }
 
 type AddressResponse struct {
@@ -35,6 +36,11 @@ type OrderItemResponse struct {
 	ProductPrice float64 `json:"product_price"`
 	Quantity     int     `json:"quantity"`
 	Subtotal     float64 `json:"subtotal"`
+}
+
+type PaymentInfoResponse struct {
+	Status     string `json:"status"`
+	PaymentURL string `json:"payment_url"`
 }
 
 type PaginationMeta struct {

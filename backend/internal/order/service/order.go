@@ -146,6 +146,20 @@ func (s *OrderService) mapToOrderDetailResponse(order *models.Order) *dto.OrderD
 		})
 	}
 
+	var paymentResponse *dto.PaymentInfoResponse
+	if len(order.Payments) > 0 {
+		latestPayment := order.Payments[0]
+		for _, p := range order.Payments {
+			if p.ID > latestPayment.ID {
+				latestPayment = p
+			}
+		}
+		paymentResponse = &dto.PaymentInfoResponse{
+			Status:     latestPayment.Status,
+			PaymentURL: latestPayment.PaymentURL,
+		}
+	}
+
 	return &dto.OrderDetailResponse{
 		ID:          order.ID,
 		OrderNumber: order.OrderNumber,
@@ -168,6 +182,7 @@ func (s *OrderService) mapToOrderDetailResponse(order *models.Order) *dto.OrderD
 			PostalCode:     order.Address.PostalCode,
 			Address:        order.Address.Address,
 		},
-		Items: itemsResponse,
+		Items:   itemsResponse,
+		Payment: paymentResponse,
 	}
 }
