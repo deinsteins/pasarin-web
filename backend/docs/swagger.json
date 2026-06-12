@@ -21,10 +21,11 @@
             "application/json": {
               "schema": {
                 "type": "object",
-                "required": ["name", "email", "password"],
+                "required": ["name", "email", "phone", "password"],
                 "properties": {
                   "name": {"type": "string"},
                   "email": {"type": "string", "format": "email"},
+                  "phone": {"type": "string", "minLength": 10, "maxLength": 15},
                   "password": {"type": "string", "minLength": 6}
                 }
               }
@@ -103,6 +104,7 @@
                     "id": {"type": "integer"},
                     "name": {"type": "string"},
                     "email": {"type": "string"},
+                    "phone": {"type": "string"},
                     "role": {"type": "string"}
                   }
                 }

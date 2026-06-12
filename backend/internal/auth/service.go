@@ -19,12 +19,19 @@ func NewAuthService(db *database.Database) *AuthService {
 	return &AuthService{db: db}
 }
 
-func (s *AuthService) Register(name, email, password string) error {
-	var count int64
-	s.db.DB().Model(&models.User{}).Where("email = ?", email).Count(&count)
+func (s *AuthService) Register(name, email, password, phone string) error {
+	var emailCount int64
+	s.db.DB().Model(&models.User{}).Where("email = ?", email).Count(&emailCount)
 
-	if count > 0 {
+	if emailCount > 0 {
 		return errors.New("email already exists")
+	}
+
+	var phoneCount int64
+	s.db.DB().Model(&models.User{}).Where("phone = ?", phone).Count(&phoneCount)
+
+	if phoneCount > 0 {
+		return errors.New("phone number already exists")
 	}
 
 	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
@@ -35,6 +42,7 @@ func (s *AuthService) Register(name, email, password string) error {
 	user := &models.User{
 		Name:     name,
 		Email:    email,
+		Phone:    phone,
 		Password: string(hashedPassword),
 		Role:     "customer",
 	}

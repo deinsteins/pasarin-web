@@ -22,14 +22,14 @@ func (h *AuthHandler) Register(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := h.authService.Register(req.Name, req.Email, req.Password); err != nil {
-		if err.Error() == "email already exists" {
+	if err := h.authService.Register(req.Name, req.Email, req.Password, req.Phone); err != nil {
+		if err.Error() == "email already exists" || err.Error() == "phone number already exists" {
 			return c.Status(fiber.StatusConflict).JSON(fiber.Map{
 				"error": err.Error(),
 			})
 		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
-			"error": "Registration failed",
+			"error": "Registration failed: " + err.Error(),
 		})
 	}
 
@@ -78,6 +78,7 @@ func (h *AuthHandler) Me(c *fiber.Ctx) error {
 		ID:    user.ID,
 		Name:  user.Name,
 		Email: user.Email,
+		Phone: user.Phone,
 		Role:  user.Role,
 	})
 }
