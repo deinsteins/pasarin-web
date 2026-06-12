@@ -2,6 +2,8 @@ package auth
 
 import (
 	"errors"
+	"fmt"
+	"math/rand"
 	"time"
 
 	"github.com/golang-jwt/jwt/v5"
@@ -150,4 +152,51 @@ type JWTClaims struct {
 	UserID         uint                    `json:"user_id"`
 	Email          string                  `json:"email"`
 	jwt.RegisteredClaims
+}
+
+func (s *AuthService) ForgotPassword(email string) (string, error) {
+	var user models.User
+	if err := s.db.DB().Where("email = ?", email).First(&user).Error; err != nil {
+		return "", errors.New("user not found")
+	}
+
+	// Generate 6-digit OTP
+	otp := fmt.Sprintf("%06d", rand.Intn(1000000))
+	user.ResetToken = otp
+	user.ResetTokenExpires = time.Now().Add(15 * time.Minute)
+
+	if err := s.db.DB().Save(&user).Error; err != nil {
+		return "", err
+	}
+
+	// Log it for development
+	fmt.Printf("[OAUTH/RESET] Reset OTP code for %s is: %s\n", email, otp)
+
+	return otp, nil
+}
+
+func (s *AuthService) ResetPassword(email, token, newPassword string) error {
+	var user models.User
+	if err := s.db.DB().Where("email = ?", email).First(&user).Error; err != nil {
+		return errors.New("user not found")
+	}
+
+	if user.ResetToken == "" || user.ResetToken != token {
+		return errors.New("invalid or expired reset token")
+	}
+
+	if time.Now().After(user.ResetTokenExpires) {
+		return errors.New("invalid or expired reset token")
+	}
+
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(newPassword), bcrypt.DefaultCost)
+	if err != nil {
+		return err
+	}
+
+	user.Password = string(hashedPassword)
+	user.ResetToken = "" // invalidate token
+	user.ResetTokenExpires = time.Time{}
+
+	return s.db.DB().Save(&user).Error
 }

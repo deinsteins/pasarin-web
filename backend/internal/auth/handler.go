@@ -145,3 +145,53 @@ func (h *AuthHandler) UpdateProfile(c *fiber.Ctx) error {
 		"message": "Profile updated successfully",
 	})
 }
+
+type ForgotPasswordRequest struct {
+	Email string `json:"email" binding:"required,email"`
+}
+
+func (h *AuthHandler) ForgotPassword(c *fiber.Ctx) error {
+	var req ForgotPasswordRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	otp, err := h.authService.ForgotPassword(req.Email)
+	if err != nil {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Reset OTP code sent successfully",
+		"otp":     otp,
+	})
+}
+
+type ResetPasswordRequest struct {
+	Email    string `json:"email" binding:"required,email"`
+	Token    string `json:"token" binding:"required"`
+	Password string `json:"password" binding:"required,min=6"`
+}
+
+func (h *AuthHandler) ResetPassword(c *fiber.Ctx) error {
+	var req ResetPasswordRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	if err := h.authService.ResetPassword(req.Email, req.Token, req.Password); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Password reset successfully",
+	})
+}

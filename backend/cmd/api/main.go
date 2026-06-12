@@ -103,6 +103,8 @@ func main() {
 	app.Post("/api/auth/register", authHandler.Register)
 	app.Post("/api/auth/login", authHandler.Login)
 	app.Post("/api/auth/oauth", authHandler.OAuthLogin)
+	app.Post("/api/auth/forgot-password", authHandler.ForgotPassword)
+	app.Post("/api/auth/reset-password", authHandler.ResetPassword)
 
 	app.Get("/api/me", middleware.JWTAuthMiddleware(), authHandler.Me)
 	app.Put("/api/me", middleware.JWTAuthMiddleware(), authHandler.UpdateProfile)

@@ -184,7 +184,7 @@ export default function LoginPage() {
                 {/* Lupa Password positioned right below Password Input */}
                 <div className="flex justify-end pr-1">
                   <Link
-                    href="#"
+                    href="/forgot-password"
                     className="text-xs font-bold text-brand-primary-600 hover:text-brand-primary-550 transition-colors"
                   >
                     Lupa Password?
