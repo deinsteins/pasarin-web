@@ -110,8 +110,9 @@ func (h *ProductHandler) GetAll(c *fiber.Ctx) error {
 	sort := c.Query("sort", "latest")
 	search := strings.TrimSpace(c.Query("search", ""))
 	categoryID := uint(c.QueryInt("category_id", 0))
+	sellerID := uint(c.QueryInt("seller_id", 0))
 
-	products, total, err := h.service.GetWithPagination(page, limit, sort, search, categoryID)
+	products, total, err := h.service.GetWithPagination(page, limit, sort, search, categoryID, sellerID)
 	if err != nil {
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error": "Failed to fetch products",
@@ -229,9 +230,16 @@ func (h *ProductHandler) Update(c *fiber.Ctx) error {
 
 	product, err := h.service.UpdatePartial(userID, uint(id), req.CategoryID, req.Name, req.Description, req.Price, req.Stock, req.Unit, req.ImageURL, req.IsActive)
 	if err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "Product not found",
-		})
+		switch err.Error() {
+		case "unauthorized":
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Access denied. Seller profile required."})
+		case "forbidden":
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "You do not own this product."})
+		case "product not found":
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Product not found"})
+		default:
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to update product"})
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(dto.ProductResponse{
@@ -266,10 +274,22 @@ func (h *ProductHandler) Delete(c *fiber.Ctx) error {
 		})
 	}
 
-	if err := h.service.Delete(uint(id)); err != nil {
-		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
-			"error": "Product not found",
-		})
+	var userID uint
+	if val := c.Locals("user_id"); val != nil {
+		userID = val.(uint)
+	}
+
+	if err := h.service.Delete(userID, uint(id)); err != nil {
+		switch err.Error() {
+		case "unauthorized":
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "Access denied. Seller profile required."})
+		case "forbidden":
+			return c.Status(fiber.StatusForbidden).JSON(fiber.Map{"error": "You do not own this product."})
+		case "product not found":
+			return c.Status(fiber.StatusNotFound).JSON(fiber.Map{"error": "Product not found"})
+		default:
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to delete product"})
+		}
 	}
 
 	return c.Status(fiber.StatusOK).JSON(fiber.Map{

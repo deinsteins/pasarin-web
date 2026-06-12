@@ -24,7 +24,7 @@ func (r *ProductRepository) FindAll() ([]models.Product, error) {
 	return products, err
 }
 
-func (r *ProductRepository) FindWithPagination(page, limit int, sort, search string, categoryID uint) ([]models.Product, int64, error) {
+func (r *ProductRepository) FindWithPagination(page, limit int, sort, search string, categoryID uint, sellerID uint) ([]models.Product, int64, error) {
 	var products []models.Product
 	var total int64
 
@@ -37,6 +37,10 @@ func (r *ProductRepository) FindWithPagination(page, limit int, sort, search str
 
 	if categoryID > 0 {
 		base = base.Where("category_id = ?", categoryID)
+	}
+
+	if sellerID > 0 {
+		base = base.Where("seller_id = ?", sellerID)
 	}
 
 	base.Count(&total)

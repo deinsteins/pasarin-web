@@ -51,7 +51,7 @@ func (s *ProductService) GetAll() ([]models.Product, error) {
 	return s.repo.FindAll()
 }
 
-func (s *ProductService) GetWithPagination(page, limit int, sort, search string, categoryID uint) ([]models.Product, int64, error) {
+func (s *ProductService) GetWithPagination(page, limit int, sort, search string, categoryID uint, sellerID uint) ([]models.Product, int64, error) {
 	if page < 1 {
 		page = 1
 	}
@@ -62,7 +62,7 @@ func (s *ProductService) GetWithPagination(page, limit int, sort, search string,
 		limit = 100
 	}
 
-	return s.repo.FindWithPagination(page, limit, sort, search, categoryID)
+	return s.repo.FindWithPagination(page, limit, sort, search, categoryID, sellerID)
 }
 
 func (s *ProductService) GetByID(id uint) (*models.Product, error) {
@@ -70,9 +70,18 @@ func (s *ProductService) GetByID(id uint) (*models.Product, error) {
 }
 
 func (s *ProductService) Update(userID uint, id uint, categoryID uint, name, description string, price float64, stock int, unit, imageURL string, isActive *bool) (*models.Product, error) {
+	seller, err := s.sellerRepo.FindByUserID(userID)
+	if err != nil {
+		return nil, errors.New("unauthorized")
+	}
+
 	product, err := s.repo.FindByID(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("product not found")
+	}
+
+	if product.SellerID != seller.ID {
+		return nil, errors.New("forbidden")
 	}
 
 	if categoryID > 0 {
@@ -111,9 +120,18 @@ func (s *ProductService) Update(userID uint, id uint, categoryID uint, name, des
 }
 
 func (s *ProductService) UpdatePartial(userID uint, id uint, categoryID *uint, name *string, description string, price *float64, stock *int, unit *string, imageURL string, isActive *bool) (*models.Product, error) {
+	seller, err := s.sellerRepo.FindByUserID(userID)
+	if err != nil {
+		return nil, errors.New("unauthorized")
+	}
+
 	product, err := s.repo.FindByID(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.New("product not found")
+	}
+
+	if product.SellerID != seller.ID {
+		return nil, errors.New("forbidden")
 	}
 
 	if categoryID != nil {
@@ -151,10 +169,19 @@ func (s *ProductService) UpdatePartial(userID uint, id uint, categoryID *uint, n
 	return product, nil
 }
 
-func (s *ProductService) Delete(id uint) error {
-	_, err := s.repo.FindByID(id)
+func (s *ProductService) Delete(userID uint, id uint) error {
+	seller, err := s.sellerRepo.FindByUserID(userID)
 	if err != nil {
-		return err
+		return errors.New("unauthorized")
+	}
+
+	product, err := s.repo.FindByID(id)
+	if err != nil {
+		return errors.New("product not found")
+	}
+
+	if product.SellerID != seller.ID {
+		return errors.New("forbidden")
 	}
 
 	return s.repo.Delete(id)
