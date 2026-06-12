@@ -39,3 +39,46 @@ export async function GET() {
     );
   }
 }
+
+export async function PUT(request: Request) {
+  try {
+    const cookieStore = await cookies();
+    const token = cookieStore.get("token")?.value;
+
+    if (!token) {
+      return NextResponse.json(
+        { error: "Not authenticated" },
+        { status: 401 }
+      );
+    }
+
+    const { name, phone, password } = await request.json();
+
+    const backendUrl = process.env.BACKEND_API_URL || "http://localhost:3000";
+    const response = await fetch(`${backendUrl}/api/me`, {
+      method: "PUT",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify({ name, phone, password }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return NextResponse.json(
+        { error: data.error || "Failed to update profile" },
+        { status: response.status }
+      );
+    }
+
+    return NextResponse.json({ success: true, message: "Profile updated successfully" });
+  } catch (error) {
+    console.error("Auth Me PUT BFF Error:", error);
+    return NextResponse.json(
+      { error: "An unexpected error occurred" },
+      { status: 500 }
+    );
+  }
+}

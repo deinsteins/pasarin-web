@@ -108,3 +108,40 @@ func (h *AuthHandler) Me(c *fiber.Ctx) error {
 		Role:  user.Role,
 	})
 }
+
+type UpdateProfileRequest struct {
+	Name     string `json:"name" binding:"required"`
+	Phone    string `json:"phone" binding:"required"`
+	Password string `json:"password"`
+}
+
+func (h *AuthHandler) UpdateProfile(c *fiber.Ctx) error {
+	userID := c.Locals("user_id")
+	if userID == nil {
+		return c.Status(fiber.StatusUnauthorized).JSON(fiber.Map{
+			"error": "Unauthorized",
+		})
+	}
+
+	var req UpdateProfileRequest
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	if err := h.authService.UpdateProfile(userID.(uint), req.Name, req.Phone, req.Password); err != nil {
+		if err.Error() == "phone number already exists" {
+			return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+				"error": err.Error(),
+			})
+		}
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "Failed to update profile: " + err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(fiber.Map{
+		"message": "Profile updated successfully",
+	})
+}

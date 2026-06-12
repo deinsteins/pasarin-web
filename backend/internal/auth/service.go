@@ -101,6 +101,35 @@ func (s *AuthService) GetUserByID(id uint) (*models.User, error) {
 	return &user, nil
 }
 
+func (s *AuthService) UpdateProfile(userID uint, name, phone, password string) error {
+	var user models.User
+	if err := s.db.DB().First(&user, userID).Error; err != nil {
+		return errors.New("user not found")
+	}
+
+	// Check if phone number is already taken by another user
+	if phone != user.Phone {
+		var phoneCount int64
+		s.db.DB().Model(&models.User{}).Where("phone = ? AND id != ?", phone, userID).Count(&phoneCount)
+		if phoneCount > 0 {
+			return errors.New("phone number already exists")
+		}
+	}
+
+	user.Name = name
+	user.Phone = phone
+
+	if password != "" {
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
+		if err != nil {
+			return err
+		}
+		user.Password = string(hashedPassword)
+	}
+
+	return s.db.DB().Save(&user).Error
+}
+
 func generateToken(userID uint, email string) string {
 	secretKey := "your-secret-key"
 	claims := &JWTClaims{

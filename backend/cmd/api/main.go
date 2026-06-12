@@ -105,6 +105,7 @@ func main() {
 	app.Post("/api/auth/oauth", authHandler.OAuthLogin)
 
 	app.Get("/api/me", middleware.JWTAuthMiddleware(), authHandler.Me)
+	app.Put("/api/me", middleware.JWTAuthMiddleware(), authHandler.UpdateProfile)
 
 	app.Post("/api/categories", categoryHandler.Create)
 	app.Get("/api/categories", categoryHandler.GetAll)
