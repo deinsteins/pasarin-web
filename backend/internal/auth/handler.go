@@ -59,6 +59,32 @@ func (h *AuthHandler) Login(c *fiber.Ctx) error {
 	})
 }
 
+type OAuthRequest struct {
+	Email string `json:"email" binding:"required,email"`
+	Name  string `json:"name" binding:"required"`
+}
+
+func (h *AuthHandler) OAuthLogin(c *fiber.Ctx) error {
+	var req OAuthRequest
+
+	if err := c.BodyParser(&req); err != nil {
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "Invalid request body",
+		})
+	}
+
+	token, err := h.authService.LoginOAuth(req.Email, req.Name)
+	if err != nil {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "OAuth login failed: " + err.Error(),
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(dto.LoginResponse{
+		Token: token,
+	})
+}
+
 func (h *AuthHandler) Me(c *fiber.Ctx) error {
 	userID := c.Locals("user_id")
 	if userID == nil {

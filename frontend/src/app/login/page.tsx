@@ -23,6 +23,7 @@ import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { Divider } from "@/components/ui/Divider";
 import { SocialButton } from "@/components/ui/SocialButton";
+import { signIn } from "next-auth/react";
 
 const loginSchema = z.object({
   email: z.string().min(1, "Email atau nomor telepon wajib diisi").refine(
@@ -204,7 +205,10 @@ export default function LoginPage() {
             <Divider className="mt-6 mb-5">Lain login</Divider>
 
             {/* Google OAuth Button */}
-            <SocialButton provider="google">
+            <SocialButton
+              provider="google"
+              onClick={() => signIn("google", { callbackUrl: "/" })}
+            >
               Lanjut dengan Google
             </SocialButton>
 

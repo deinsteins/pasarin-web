@@ -65,6 +65,34 @@ func (s *AuthService) Login(identifier, password string) (string, error) {
 	return token, nil
 }
 
+func (s *AuthService) LoginOAuth(email, name string) (string, error) {
+	var user models.User
+	err := s.db.DB().Where("email = ?", email).First(&user).Error
+
+	if err != nil {
+		// User doesn't exist, register them
+		hashedPassword, err := bcrypt.GenerateFromPassword([]byte(time.Now().String()), bcrypt.DefaultCost)
+		if err != nil {
+			return "", err
+		}
+
+		user = models.User{
+			Name:     name,
+			Email:    email,
+			Phone:    "google_" + email,
+			Password: string(hashedPassword),
+			Role:     "customer",
+		}
+
+		if err := s.db.DB().Create(&user).Error; err != nil {
+			return "", err
+		}
+	}
+
+	token := generateToken(user.ID, user.Email)
+	return token, nil
+}
+
 func (s *AuthService) GetUserByID(id uint) (*models.User, error) {
 	var user models.User
 	if err := s.db.DB().First(&user, id).Error; err != nil {

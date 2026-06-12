@@ -20,6 +20,7 @@ import { Button } from "@/components/ui/Button";
 import { Alert } from "@/components/ui/Alert";
 import { Divider } from "@/components/ui/Divider";
 import { SocialButton } from "@/components/ui/SocialButton";
+import { signIn } from "next-auth/react";
 
 const registerSchema = z
   .object({
@@ -238,7 +239,10 @@ export default function RegisterPage() {
           <Divider className="mt-6 mb-5">Atau daftar dengan</Divider>
 
           {/* Google OAuth Button */}
-          <SocialButton provider="google">
+          <SocialButton
+            provider="google"
+            onClick={() => signIn("google", { callbackUrl: "/" })}
+          >
             Google
           </SocialButton>
 

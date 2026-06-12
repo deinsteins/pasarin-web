@@ -102,6 +102,7 @@ func main() {
 
 	app.Post("/api/auth/register", authHandler.Register)
 	app.Post("/api/auth/login", authHandler.Login)
+	app.Post("/api/auth/oauth", authHandler.OAuthLogin)
 
 	app.Get("/api/me", middleware.JWTAuthMiddleware(), authHandler.Me)
 
