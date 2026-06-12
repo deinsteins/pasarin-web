@@ -3,8 +3,8 @@ import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
 
 export const metadata: Metadata = {
-  title: "Pasarin - Premium Marketplace",
-  description: "Modern organic marketplace",
+  title: "Pasarin - Marketplace Pangan Modern & Tradisional",
+  description: "Menghubungkan petani, pedagang pasar tradisional, dan konsumen secara mudah dan terpercaya.",
 };
 
 export default function RootLayout({
@@ -14,7 +14,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="id"
       className="h-full antialiased font-sans"
     >
       <body className="min-h-full flex flex-col">

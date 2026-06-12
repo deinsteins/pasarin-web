@@ -1,21 +1,58 @@
+@import url("https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;450;500;600;700;800&family=Inter:wght@300;400;500;600;700;800&display=swap");
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --background: #fcfdfc;
+  --foreground: #0f172a;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+@theme {
+  /* Brand Primary: Vibrant Green */
+  --color-brand-primary-50: #f0fdf4;
+  --color-brand-primary-100: #dcfce7;
+  --color-brand-primary-200: #bbf7d0;
+  --color-brand-primary-300: #86efac;
+  --color-brand-primary-400: #4ade80;
+  --color-brand-primary-500: #22c55e;
+  --color-brand-primary-600: #16a34a;
+  --color-brand-primary-700: #15803d;
+  --color-brand-primary-800: #166534;
+  --color-brand-primary-900: #14532d;
+
+  /* Brand Secondary: Warm Orange */
+  --color-brand-secondary-50: #fff7ed;
+  --color-brand-secondary-100: #ffedd5;
+  --color-brand-secondary-200: #fed7aa;
+  --color-brand-secondary-300: #fdba74;
+  --color-brand-secondary-400: #fb923c;
+  --color-brand-secondary-500: #f97316;
+  --color-brand-secondary-600: #ea580c;
+  --color-brand-secondary-700: #c2410c;
+  --color-brand-secondary-800: #9a3412;
+  --color-brand-secondary-900: #7c2d12;
+
+  /* Typography System */
+  --font-sans: "Plus Jakarta Sans", "Inter", system-ui, -apple-system, sans-serif;
+  --font-heading: "Plus Jakarta Sans", sans-serif;
+  --font-body: "Inter", sans-serif;
+
+  /* Soft UI Shadow System */
+  --shadow-soft-sm: 0 2px 8px -1px rgba(15, 23, 42, 0.03), 0 1px 3px -1px rgba(15, 23, 42, 0.02);
+  --shadow-soft-md: 0 12px 24px -4px rgba(15, 23, 42, 0.04), 0 4px 12px -2px rgba(15, 23, 42, 0.02);
+  --shadow-soft-lg: 0 20px 40px -8px rgba(15, 23, 42, 0.06), 0 8px 20px -4px rgba(15, 23, 42, 0.03);
+  --shadow-soft-xl: 0 30px 60px -15px rgba(15, 23, 42, 0.08), 0 15px 30px -5px rgba(15, 23, 42, 0.04);
+
+  /* Border Radius System */
+  --radius-soft-sm: 8px;
+  --radius-soft-md: 12px;
+  --radius-soft-lg: 16px;
+  --radius-soft-xl: 24px;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+    --background: #090d0b;
+    --foreground: #f8fafc;
   }
 }
 

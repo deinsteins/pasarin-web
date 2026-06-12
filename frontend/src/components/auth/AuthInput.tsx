@@ -28,7 +28,7 @@ export const AuthInput = React.forwardRef<HTMLInputElement, AuthInputProps>(
           <input
             ref={ref}
             type={currentType}
-            className={`w-full rounded-xl border border-zinc-200 bg-white py-3 pr-4 text-sm text-zinc-900 outline-none transition-all duration-200 placeholder:text-zinc-400 hover:border-zinc-300 focus:border-transparent focus:ring-2 focus:ring-indigo-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600 dark:hover:border-zinc-700 dark:focus:ring-indigo-600 ${
+            className={`w-full rounded-soft-md border border-zinc-200 bg-white py-3 pr-4 text-sm text-zinc-900 outline-none transition-all duration-200 placeholder:text-zinc-400 hover:border-zinc-300 focus:border-transparent focus:ring-2 focus:ring-brand-primary-500 dark:border-zinc-800 dark:bg-zinc-950 dark:text-white dark:placeholder:text-zinc-600 dark:hover:border-zinc-700 dark:focus:ring-brand-primary-600 ${
               Icon ? "pl-11" : "pl-4"
             } ${
               error

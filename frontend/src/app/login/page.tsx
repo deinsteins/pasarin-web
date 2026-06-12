@@ -66,7 +66,7 @@ export default function LoginPage() {
   if (authLoading || user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-primary-600 border-t-transparent"></div>
       </div>
     );
   }
@@ -74,13 +74,13 @@ export default function LoginPage() {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-zinc-50 py-12 px-4 dark:bg-zinc-950 sm:px-6 lg:px-8">
       {/* Background Gradients */}
-      <div className="absolute top-0 left-1/4 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-indigo-500/10 blur-[120px] dark:bg-indigo-500/5"></div>
-      <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] translate-x-1/2 rounded-full bg-violet-500/10 blur-[120px] dark:bg-violet-500/5"></div>
+      <div className="absolute top-0 left-1/4 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-brand-primary-500/10 blur-[120px] dark:bg-brand-primary-500/5"></div>
+      <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] translate-x-1/2 rounded-full bg-brand-secondary-500/10 blur-[120px] dark:bg-brand-secondary-500/5"></div>
 
-      <AuthCard title="Welcome Back" subtitle="Sign in to your Pasarin account">
+      <AuthCard title="Selamat Datang" subtitle="Masuk ke portal akun Pasarin Anda">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           {formError && (
-            <div className="flex items-center gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
+            <div className="flex items-center gap-2.5 rounded-soft-md border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
               <AlertCircle className="h-5 w-5 shrink-0" />
               <span>{formError}</span>
             </div>
@@ -88,9 +88,9 @@ export default function LoginPage() {
 
           <AuthInput
             {...register("email")}
-            label="Email Address"
+            label="Alamat Email"
             type="email"
-            placeholder="name@example.com"
+            placeholder="nama@email.com"
             icon={Mail}
             error={errors.email?.message}
             autoComplete="email"
@@ -98,7 +98,7 @@ export default function LoginPage() {
 
           <AuthInput
             {...register("password")}
-            label="Password"
+            label="Kata Sandi"
             type="password"
             placeholder="••••••••"
             icon={Lock}
@@ -110,29 +110,29 @@ export default function LoginPage() {
             <label className="flex items-center gap-2 text-zinc-600 dark:text-zinc-400 cursor-pointer">
               <input
                 type="checkbox"
-                className="h-4 w-4 rounded border-zinc-300 text-indigo-600 focus:ring-indigo-500 dark:border-zinc-800 dark:bg-zinc-950 dark:focus:ring-indigo-600 cursor-pointer"
+                className="h-4 w-4 rounded border-zinc-300 text-brand-primary-600 focus:ring-brand-primary-500 dark:border-zinc-800 dark:bg-zinc-950 dark:focus:ring-brand-primary-600 cursor-pointer"
               />
-              Remember me
+              Ingat saya
             </label>
-            <a href="#" className="font-semibold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300">
-              Forgot password?
+            <a href="#" className="font-semibold text-brand-primary-600 hover:text-brand-primary-500 dark:text-brand-primary-400 dark:hover:text-brand-primary-300">
+              Lupa sandi?
             </a>
           </div>
 
           <AuthButton type="submit" isLoading={isSubmitting} className="mt-2">
             <span className="flex items-center gap-2">
               <LogIn className="h-4 w-4" />
-              Sign In
+              Masuk Sekarang
             </span>
           </AuthButton>
 
           <p className="text-center text-sm text-zinc-500 dark:text-zinc-400 mt-6">
-            Don't have an account?{" "}
+            Belum punya akun?{" "}
             <Link
               href="/register"
-              className="font-bold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+              className="font-bold text-brand-primary-600 hover:text-brand-primary-500 dark:text-brand-primary-400 dark:hover:text-brand-primary-300"
             >
-              Sign up
+              Daftar disini
             </Link>
           </p>
         </form>

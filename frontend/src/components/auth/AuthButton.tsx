@@ -8,7 +8,7 @@ export function AuthButton({ children, isLoading, className = "", ...props }: Au
   return (
     <button
       disabled={isLoading || props.disabled}
-      className={`relative flex w-full items-center justify-center rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 py-3.5 px-4 text-sm font-semibold text-white shadow-md transition-all duration-200 hover:from-indigo-500 hover:to-violet-500 active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 cursor-pointer ${className}`}
+      className={`relative flex w-full items-center justify-center rounded-soft-md bg-gradient-to-r from-brand-primary-500 to-brand-primary-600 py-3.5 px-4 text-sm font-semibold text-white shadow-soft-md transition-all duration-200 hover:from-brand-primary-600 hover:to-brand-primary-700 hover:shadow-soft-lg active:scale-[0.98] disabled:pointer-events-none disabled:opacity-50 cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-primary-500 focus:ring-offset-2 dark:focus:ring-brand-primary-400 ${className}`}
       {...props}
     >
       {isLoading ? (

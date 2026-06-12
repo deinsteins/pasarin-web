@@ -80,7 +80,7 @@ export default function RegisterPage() {
   if (authLoading || user) {
     return (
       <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-        <div className="h-8 w-8 animate-spin rounded-full border-4 border-indigo-600 border-t-transparent"></div>
+        <div className="h-8 w-8 animate-spin rounded-full border-4 border-brand-primary-600 border-t-transparent"></div>
       </div>
     );
   }
@@ -88,20 +88,20 @@ export default function RegisterPage() {
   return (
     <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-zinc-50 py-12 px-4 dark:bg-zinc-950 sm:px-6 lg:px-8">
       {/* Background Gradients */}
-      <div className="absolute top-0 left-1/4 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-indigo-500/10 blur-[120px] dark:bg-indigo-500/5"></div>
-      <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] translate-x-1/2 rounded-full bg-violet-500/10 blur-[120px] dark:bg-violet-500/5"></div>
+      <div className="absolute top-0 left-1/4 h-[500px] w-[500px] -translate-x-1/2 rounded-full bg-brand-primary-500/10 blur-[120px] dark:bg-brand-primary-500/5"></div>
+      <div className="absolute bottom-0 right-1/4 h-[500px] w-[500px] translate-x-1/2 rounded-full bg-brand-secondary-500/10 blur-[120px] dark:bg-brand-secondary-500/5"></div>
 
-      <AuthCard title="Create Account" subtitle="Get started with your free Pasarin account">
+      <AuthCard title="Daftar Akun" subtitle="Bergabung dengan ekosistem marketplace pangan Pasarin">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-5">
           {formError && (
-            <div className="flex items-center gap-2.5 rounded-xl border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
+            <div className="flex items-center gap-2.5 rounded-soft-md border border-red-200 bg-red-50 p-4 text-sm font-medium text-red-700 dark:border-red-900/30 dark:bg-red-950/20 dark:text-red-400">
               <AlertCircle className="h-5 w-5 shrink-0" />
               <span>{formError}</span>
             </div>
           )}
 
           {formSuccess && (
-            <div className="flex items-center gap-2.5 rounded-xl border border-green-200 bg-green-50 p-4 text-sm font-medium text-green-700 dark:border-green-900/30 dark:bg-green-950/20 dark:text-green-400">
+            <div className="flex items-center gap-2.5 rounded-soft-md border border-green-200 bg-green-50 p-4 text-sm font-medium text-green-700 dark:border-green-900/30 dark:bg-green-950/20 dark:text-green-400">
               <CheckCircle className="h-5 w-5 shrink-0" />
               <span>{formSuccess}</span>
             </div>
@@ -109,9 +109,9 @@ export default function RegisterPage() {
 
           <AuthInput
             {...register("name")}
-            label="Full Name"
+            label="Nama Lengkap"
             type="text"
-            placeholder="John Doe"
+            placeholder="Budi Santoso"
             icon={User}
             error={errors.name?.message}
             autoComplete="name"
@@ -119,9 +119,9 @@ export default function RegisterPage() {
 
           <AuthInput
             {...register("email")}
-            label="Email Address"
+            label="Alamat Email"
             type="email"
-            placeholder="name@example.com"
+            placeholder="nama@email.com"
             icon={Mail}
             error={errors.email?.message}
             autoComplete="email"
@@ -129,7 +129,7 @@ export default function RegisterPage() {
 
           <AuthInput
             {...register("password")}
-            label="Password"
+            label="Kata Sandi"
             type="password"
             placeholder="••••••••"
             icon={Lock}
@@ -139,7 +139,7 @@ export default function RegisterPage() {
 
           <AuthInput
             {...register("confirmPassword")}
-            label="Confirm Password"
+            label="Konfirmasi Kata Sandi"
             type="password"
             placeholder="••••••••"
             icon={Lock}
@@ -150,17 +150,17 @@ export default function RegisterPage() {
           <AuthButton type="submit" isLoading={isSubmitting} className="mt-2">
             <span className="flex items-center gap-2">
               <UserPlus className="h-4 w-4" />
-              Create Account
+              Daftar Sekarang
             </span>
           </AuthButton>
 
           <p className="text-center text-sm text-zinc-500 dark:text-zinc-400 mt-6">
-            Already have an account?{" "}
+            Sudah memiliki akun?{" "}
             <Link
               href="/login"
-              className="font-bold text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+              className="font-bold text-brand-primary-600 hover:text-brand-primary-500 dark:text-brand-primary-400 dark:hover:text-brand-primary-300"
             >
-              Sign in
+              Masuk disini
             </Link>
           </p>
         </form>
