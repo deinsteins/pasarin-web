@@ -16,7 +16,16 @@ import { Alert } from "@/components/ui/Alert";
 import { Checkbox } from "@/components/ui/Checkbox";
 
 const loginSchema = z.object({
-  email: z.string().min(1, "Email is required").email("Invalid email address"),
+  email: z.string().min(1, "Email or phone number is required").refine(
+    (val) => {
+      const isEmail = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(val);
+      const isPhone = /^\+?[0-9]{10,15}$/.test(val);
+      return isEmail || isPhone;
+    },
+    {
+      message: "Must be a valid email or phone number (10-15 digits)",
+    }
+  ),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -89,12 +98,12 @@ export default function LoginPage() {
 
           <Input
             {...register("email")}
-            label="Alamat Email"
-            type="email"
-            placeholder="nama@email.com"
+            label="Email atau No. Telepon"
+            type="text"
+            placeholder="nama@email.com atau 08123456789"
             icon={Mail}
             error={errors.email?.message}
-            autoComplete="email"
+            autoComplete="username"
           />
 
           <Input

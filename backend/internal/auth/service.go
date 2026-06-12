@@ -50,9 +50,9 @@ func (s *AuthService) Register(name, email, password, phone string) error {
 	return s.db.DB().Create(user).Error
 }
 
-func (s *AuthService) Login(email, password string) (string, error) {
+func (s *AuthService) Login(identifier, password string) (string, error) {
 	var user models.User
-	if err := s.db.DB().Where("email = ?", email).First(&user).Error; err != nil {
+	if err := s.db.DB().Where("email = ? OR phone = ?", identifier, identifier).First(&user).Error; err != nil {
 		return "", errors.New("invalid credentials")
 	}
 
